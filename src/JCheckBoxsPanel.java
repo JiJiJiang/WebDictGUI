@@ -9,7 +9,7 @@ public class JCheckBoxsPanel extends JPanel{
 
     //private FlowLayout flowLayout=new FlowLayout(FlowLayout.LEFT,70,1);
     //constructor
-    public JCheckBoxsPanel()
+    public JCheckBoxsPanel(ContentPanel contentPanel)
     {
         //setLayout(flowLayout);
         setLayout(new GridLayout(1,3,0,0));
@@ -41,6 +41,7 @@ public class JCheckBoxsPanel extends JPanel{
         add(jinshanPanel);
 
         /*add all listeners here!*/
+
     }
 /*
     protected void paintComponent(Graphics g)

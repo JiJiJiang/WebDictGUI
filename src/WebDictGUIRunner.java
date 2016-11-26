@@ -27,17 +27,17 @@ public class WebDictGUIRunner extends JFrame{
     public WebDictGUIRunner()
     {
         setLayout(new BorderLayout());
-        //head panel
-        HeadPanel headPanel=new HeadPanel();
-        add(headPanel,BorderLayout.NORTH);
         //content panel
         ContentPanel contentPanel=new ContentPanel();
         add(contentPanel,BorderLayout.CENTER);
+        //head panel
+        HeadPanel headPanel=new HeadPanel(contentPanel);
+        add(headPanel,BorderLayout.NORTH);
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args)throws Exception
     {
-        //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         WebDictGUIRunner frame=new WebDictGUIRunner();
         frame.setTitle("WebDict");
         frame.setSize(FRAME_WIDTH,FRAME_HEIGHT);

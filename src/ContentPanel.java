@@ -11,6 +11,7 @@ public class ContentPanel extends JPanel{
 
     private FlowLayout flowLayout=new FlowLayout(FlowLayout.LEFT,5,5);
     private JTextPane textPane=new JTextPane();
+    private JPanel outlinePanel=new JPanel();
     //constructor
     public ContentPanel()
     {
@@ -19,10 +20,12 @@ public class ContentPanel extends JPanel{
 
         textPane.setBackground(textPaneColor);
         textPane.setEditable(false);//set it uneditable
-        textPane.setBorder(new LineBorder(myColor,1));
-        //textPane.setAutoscrolls(true);
+        //textPane.setBorder(new LineBorder(myColor,1));
 		/*add textPane*/
-        add(textPane);
+		outlinePanel.setLayout(flowLayout);
+        outlinePanel.add(textPane);
+        outlinePanel.setBorder(new LineBorder(myColor,1));
+        add(outlinePanel);
         //JScrollPane scrollPane=new JScrollPane(textPane);
         //add(scrollPane,BorderLayout.CENTER);
     }
@@ -30,6 +33,7 @@ public class ContentPanel extends JPanel{
     {
         super.paintComponent(g);
         //System.out.println(getWidth());
-        textPane.setSize(new Dimension(getWidth()-2*flowLayout.getHgap(),getHeight()-2*flowLayout.getVgap()));
+        outlinePanel.setSize(new Dimension(getWidth()-2*flowLayout.getHgap(),getHeight()-2*flowLayout.getVgap()));
+        textPane.setSize(new Dimension(outlinePanel.getWidth()-2*flowLayout.getHgap(),outlinePanel.getHeight()-2*flowLayout.getVgap()));
     }
 }
