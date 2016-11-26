@@ -9,7 +9,7 @@ public class ContentPanel extends JPanel{
     private final Color myColor=new Color(39,154,235);//天蓝色
     private final Color textPaneColor=new Color(240, 240, 240);//textPane背景色
 
-    private FlowLayout flowLayout=new FlowLayout(FlowLayout.LEFT,10,5);
+    private FlowLayout flowLayout=new FlowLayout(FlowLayout.LEFT,5,5);
     private JTextPane textPane=new JTextPane();
     //constructor
     public ContentPanel()

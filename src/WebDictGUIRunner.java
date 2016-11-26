@@ -18,12 +18,10 @@ import java.util.*;
 
 public class WebDictGUIRunner extends JFrame{
 	private final static int FRAME_WIDTH=580;
-	private final static int FRAME_HEIGHT=400;
+	private final static int FRAME_HEIGHT=420;
     /*字体常量*/
     private final Font font=new Font("Serif",Font.ITALIC,18);//字体
     private final Font bigFont=new Font("SanSerif", Font.ITALIC, 25);//大字体
-    /*颜色常量*/
-    //private final Color myColor=new Color(83,182,249);//天蓝色
 
     //constructor
     public WebDictGUIRunner()

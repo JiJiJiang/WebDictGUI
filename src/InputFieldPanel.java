@@ -12,13 +12,15 @@ public class InputFieldPanel extends JPanel{
 
     private final Color myColor=new Color(39,154,235);//天蓝色
     private final Font font=new Font("Serif",Font.ITALIC,15);//字体
+
+    private JTextField textInput = new JTextField(45);
     //constructor
     public InputFieldPanel()
     {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(super.getPreferredSize().width,34));
 
-        JTextField textInput = new JTextField(45);
+        //JTextField textInput = new JTextField(45);
         textInput.setBackground(Color.WHITE);
         textInput.setForeground(Color.BLACK);
         textInput.setFont(font);
@@ -55,7 +57,7 @@ public class InputFieldPanel extends JPanel{
         //searchButton.setPreferredSize(new Dimension(100,super.getPreferredSize().height));
         //searchButton.setFocusable(true);
         searchButton.setFocusPainted(false);
-        ToolTipManager.sharedInstance().setDismissDelay(10000);
+        ToolTipManager.sharedInstance().setDismissDelay(10000);//display 10s
         searchButton.setToolTipText("点击搜索！");
 
         add(innerPanel,BorderLayout.CENTER);
@@ -63,5 +65,11 @@ public class InputFieldPanel extends JPanel{
         //setBackground(myColor);
 
         /*add all listeners here!*/
+    }
+    protected void paintComponent(Graphics g)
+    {
+        super.paintComponent(g);
+        //System.out.println(getWidth());
+        textInput.setSize(new Dimension(getWidth()-100-6*2,textInput.getHeight()));
     }
 }
