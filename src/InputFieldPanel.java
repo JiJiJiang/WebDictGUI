@@ -18,9 +18,12 @@ public class InputFieldPanel extends JPanel{
     private final Font font=new Font("Serif",Font.ITALIC,15);//字体
 
     private JTextField textInput = new JTextField(45);
+
+    private ContentPanel contentPanel;//use it to display the result
     //constructor
     public InputFieldPanel(ContentPanel contentPanel)
     {
+        this.contentPanel=contentPanel;
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(super.getPreferredSize().width,34));
 
@@ -92,10 +95,10 @@ public class InputFieldPanel extends JPanel{
                 String input = textInput.getText().trim();//delete the space at both ends
                 if (!input.isEmpty())
                 {
-                    //从服务器获取单词查询结果
-                    String[] searchResult=get(input);
-                    for(String str:searchResult)
-                        model.addElement(str);
+                    //get all associational words from the server
+                    String[] associationalWords=getAssocitionalWords(input);
+                    for(String word:associationalWords)
+                        model.addElement(word);
                 }
 
                 cbInput.setPopupVisible(false);//关闭下拉框
@@ -125,7 +128,9 @@ public class InputFieldPanel extends JPanel{
                         {
                             String[] tokens=cbInput.getSelectedItem().toString().split("\t");
                             textInput.setText(tokens[0]);//textInput
-                            //handleSearchResult(textPane,true,tokens[0],tokens[1].trim());//textPane
+                            //textPane
+                            contentPanel.displayWordExplanations(tokens[0]);
+
                         }
                         else//unmatch any item in cbInput,print error message.
                         {
@@ -183,14 +188,14 @@ public class InputFieldPanel extends JPanel{
     }
 
     /*the interface with the server*/
-    //get the explanations of input from the server
-    String[] get(String input)
+    //get the associational words from the server
+    String[] getAssocitionalWords(String input)
     {
-        //to complete!
-        String[] result=new String[3];
-        result[0]="baidu";
-        result[1]="youdao";
-        result[2]="jinshan";
-        return result;
+        //to complete
+        String[] words=new String[3];
+        words[0]="baidu";
+        words[1]="youdao";
+        words[2]="jinshan";
+        return words;
     }
 }

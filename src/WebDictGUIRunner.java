@@ -19,9 +19,6 @@ import java.util.*;
 public class WebDictGUIRunner extends JFrame{
 	private final static int FRAME_WIDTH=580;
 	private final static int FRAME_HEIGHT=420;
-    /*字体常量*/
-    private final Font font=new Font("Serif",Font.ITALIC,18);//字体
-    private final Font bigFont=new Font("SanSerif", Font.ITALIC, 25);//大字体
 
     //constructor
     public WebDictGUIRunner()
@@ -29,7 +26,13 @@ public class WebDictGUIRunner extends JFrame{
         setLayout(new BorderLayout());
         //content panel
         ContentPanel contentPanel=new ContentPanel();
-        add(contentPanel,BorderLayout.CENTER);
+        JScrollPane jScrollPane=new JScrollPane(contentPanel);
+        //jScrollPane.setBorder(new LineBorder(Color.GRAY,0));
+        jScrollPane.getVerticalScrollBar().setUnitIncrement(15);
+        //jScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        add(jScrollPane,BorderLayout.CENTER);
+        //add(contentPanel,BorderLayout.CENTER);
+
         //head panel
         HeadPanel headPanel=new HeadPanel(contentPanel);
         add(headPanel,BorderLayout.NORTH);
