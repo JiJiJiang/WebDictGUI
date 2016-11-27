@@ -4,14 +4,13 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
 /**
  * Created by 77 on 2016/11/26.
  */
 public class InputFieldPanel extends JPanel{
-    private final int MAX_ROW_COUNT=5;//下拉框最大显示的行数
+    private final int MAX_ROW_COUNT=6;//下拉框最大显示的行数
     //private final int MAX_COUNT=10;
 
     private final Color myColor=new Color(39,154,235);//天蓝色
@@ -71,6 +70,7 @@ public class InputFieldPanel extends JPanel{
         //setBackground(myColor);
 
         /*add all listeners here!*/
+        //textField Input
         textInput.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e)
             {
@@ -101,14 +101,21 @@ public class InputFieldPanel extends JPanel{
                         model.addElement(word);
                 }
 
-                cbInput.setPopupVisible(false);//关闭下拉框
-                if(model.getSize() > 0)//重新显示下拉框
+                boolean isACompleteWord=false;//modify it!!!
+                if(!isACompleteWord) {
+                    cbInput.setSelectedItem(null);
+                    contentPanel.getTextPane().setText("");//clear extPane
+                    contentPanel.getTextPane().removeAll();
+                }
+                cbInput.setPopupVisible(false);//set cbInput invisible
+                if(model.getSize() > 0)
                 {
                     cbInput.setPopupVisible(true);
                 }
                 setAdjusting(cbInput, false);//关闭修改下拉框
             }
         });
+        //keyboard Input
         textInput.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e)
@@ -166,7 +173,62 @@ public class InputFieldPanel extends JPanel{
                 setAdjusting(cbInput, false);//关闭修改下拉框
             }
         });
+
+        //cbInput
+        cbInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if (!isAdjusting(cbInput))
+                {
+                    //System.out.println("BBB");
+                    if (cbInput.getSelectedItem() != null)
+                    {
+                        //textInput,textPane
+                        String[] tokens=cbInput.getSelectedItem().toString().split("\t");
+                        textInput.setText(tokens[0]);//textInput
+                        contentPanel.displayWordExplanations(tokens[0]);//textPane
+                    }
+                }
+            }
+        });
+
+        /*searchButton*/
+        searchButton.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e)
+            {
+                if (!isAdjusting(cbInput))
+                {
+                    if(cbInput.getSelectedIndex()>=0)//matched item in cbInput
+                    {
+                        //display in textInput,textPane
+                        String[] tokens=cbInput.getSelectedItem().toString().split("\t");
+                        textInput.setText(tokens[0]);//textInput
+                        contentPanel.displayWordExplanations(tokens[0]);//textPane
+                    }
+                    else
+                    {
+                        String errorWordOrPhrase=textInput.getText();
+                        if(errorWordOrPhrase.trim().length()!=0)
+                        {
+                            /*
+                            if(correctionItem.size()==0)
+                                handleSearchResult(textPane,true,errorWordOrPhrase,"没有找到\""+errorWordOrPhrase+"\"相关的英汉翻译结果");//textPane
+                            else
+                            {
+                                handleSearchResult(textPane,true,errorWordOrPhrase,"");//textPane
+                                printCorrectionItem(textPane);
+                            }
+                            */
+                        }
+                    }
+                    cbInput.setPopupVisible(false);
+                }
+            }
+        });
     }
+
+
     /*judge whether cbInput is being used.*/
     private static boolean isAdjusting(JComboBox<String> cbInput)
     {
@@ -192,10 +254,13 @@ public class InputFieldPanel extends JPanel{
     String[] getAssocitionalWords(String input)
     {
         //to complete
-        String[] words=new String[3];
-        words[0]="baidu";
-        words[1]="youdao";
-        words[2]="jinshan";
+        String[] words=new String[6];
+        words[0]="baidu-associational-word1";
+        words[1]="baidu-associational-word2";
+        words[2]="youdao-associational-word1";
+        words[3]="youdao-associational-word2";
+        words[4]="jinshan-associational-word1";
+        words[5]="jinshan-associational-word2";
         return words;
     }
 }

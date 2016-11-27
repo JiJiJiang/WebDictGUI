@@ -2,6 +2,10 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
 import java.security.acl.Group;
 
 /**
@@ -10,45 +14,73 @@ import java.security.acl.Group;
 public class ContentPanel extends JPanel{
     /*colors*/
     private final Color myColor=new Color(39,154,235);//天蓝色
-    private final Color textPaneColor=new Color(240, 240, 240);//textPane背景色
+    private final Color textPaneColor=new Color(242, 242, 242);//textPane背景色
 
     /*fonts*/
     private final Font smallFont=new Font("Serif",Font.ITALIC,18);//字体
-    private final Font bigFont=new Font("SanSerif", Font.ITALIC, 25);//大字体
+    private final Font bigFont=new Font("SanSerif", Font.ITALIC, 22);//大字体
 
     /*components*/
     private FlowLayout flowLayout=new FlowLayout(FlowLayout.LEFT,5,5);
     private JTextPane textPane=new JTextPane();//the real display area.
-    private JPanel outlinePanel=new JPanel();
+    public JTextPane getTextPane()
+    {
+        return textPane;
+    }
+    private JScrollPane jScrollPane;//the outside JScrollPane
+    int resetValue=0;//reset jScrollPane
+
+    /*(un)fold imageIcons*/
+    boolean[] isUnfold={true,true,true};//initial unfold
+    private void renewIsUnfold()
+    {
+        for(int i=0;i<3;i++) isUnfold[i]=true;
+    }
+    ImageIcon foldIamgeIcon=new ImageIcon("image/fold.jpg");
+    ImageIcon unfoldIamgeIcon=new ImageIcon("image/unfold.jpg");
+
+    /*(dis)like imageIcons*/
+    boolean[] isLike={false,false,false};//initial dislike
+    private void renewIsLike()
+    {
+        for(int i=0;i<3;i++) isLike[i]=false;
+    }
+    ImageIcon likeImageIcon=new ImageIcon("image/like.jpg");
+    ImageIcon dislikeImageIcon=new ImageIcon("image/dislike.jpg");
+
+    /*from the server*/
+    String curWordOrPhrase=null;
+    String[] explanations;
+    int[] displayOrder;
 
     /*websites*/
+    String line="";
+    String spaceContent="                                                             ";
     String[] websiteTitle={"百度","有道","金山"};
-    boolean[] selectedItem=new boolean[3];//store items chosen by the user.
+    boolean[] selectedItem={false,true,false};//store items chosen by the user.
     public void setSelectedItem(int index,boolean isSelected)
     {
         selectedItem[index]=isSelected;
+        if(curWordOrPhrase!=null)
+            displayWordExplanations(curWordOrPhrase);
     }
 
     //constructor
     public ContentPanel()
     {
-        setLayout(flowLayout);
-
+        for(int i=0;i<40;i++) line+="_____________";
         textPane.setBackground(textPaneColor);
         textPane.setEditable(false);//set it uneditable
         //textPane.setBorder(new LineBorder(myColor,1));
 		/*add textPane*/
-        //outlinePanel.setLayout(flowLayout);
-        //outlinePanel.add(textPane);
-        //outlinePanel.setBorder(new LineBorder(myColor,1));
-        add(outlinePanel);
 
         /*copy from baidu,it realizes autoLineWrap of textPane*/
-        GroupLayout panel_contentLayout = new GroupLayout(outlinePanel);
-        outlinePanel.setLayout(panel_contentLayout);
+        GroupLayout panel_contentLayout = new GroupLayout(this);
+        setLayout(panel_contentLayout);
+        panel_contentLayout.setAutoCreateContainerGaps(true);
         panel_contentLayout.setHorizontalGroup(
                 panel_contentLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(textPane, 0, 1, Short.MAX_VALUE)
+                        .addComponent(textPane, 0, 250, Short.MAX_VALUE)
         );
         panel_contentLayout.setVerticalGroup(
                 panel_contentLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -59,53 +91,124 @@ public class ContentPanel extends JPanel{
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        //System.out.println(getHeight());
-        outlinePanel.setSize(new Dimension(getWidth()-2*flowLayout.getHgap(),getHeight()-2*flowLayout.getVgap()));
-        textPane.setSize(new Dimension(outlinePanel.getWidth()-2*flowLayout.getHgap(),outlinePanel.getHeight()-2*flowLayout.getVgap()));
+        //jScrollPane.getVerticalScrollBar().setValue(resetValue);
+        System.out.println(jScrollPane.getVerticalScrollBar().getValue());
+    }
+    public void setJScrollPane(JScrollPane jScrollPane) {
+        this.jScrollPane = jScrollPane;
+        JScrollBar vBar = this.jScrollPane.getVerticalScrollBar();
+        vBar.addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                //System.out.println(e.getValue());
+                //System.out.println(vBar.getMaximum());
+                //if(e.getValue()==vBar.getValue())
+                    ;
+            }
+        });
     }
 
     public void displayWordExplanations(String wordOrPhrase)
     {
-        textPane.setText("");//清空textPane
-
-        //to complete
-        String[] explanations=getExplanations(wordOrPhrase);
-        int[] displayOrder=getDisplayOrder(wordOrPhrase);
+        if(this.curWordOrPhrase!=wordOrPhrase)//first search this word
+        {
+            this.curWordOrPhrase=wordOrPhrase;
+            explanations=getExplanations(curWordOrPhrase);
+            displayOrder=getDisplayOrder(curWordOrPhrase);
+            renewIsLike();
+            renewIsUnfold();
+        }
+        textPane.setText("");//clear textPane
+        textPane.removeAll();
+        //textPane.updateUI();
+        //textPane.repaint();
 
         //baidu,youdao and jinshan.
         for(int i=0;i<3;i++) {
-            if(selectedItem[displayOrder[i]])
-                printAWebsiteResultOnTextpane(websiteTitle[displayOrder[i]],wordOrPhrase,explanations[displayOrder[i]]);
+            if (selectedItem[displayOrder[i]]) {
+                try {
+                    printAWebsiteResultOnTextpane(displayOrder[i],websiteTitle[displayOrder[i]],explanations[displayOrder[i]]);
+                }catch (BadLocationException ble) {
+                    // TODO: handle exception
+                    System.out.println("BadLocationException:" + ble);
+                }
+            }
         }
-        textPane.setCaretPosition(0);//display from the first line
     }
     /* display a website result in textPane using font.*/
-    private void printAWebsiteResultOnTextpane(String websiteTitle,String wordOrPhrase,String explanation)
+    private void printAWebsiteResultOnTextpane(int index,String websiteTitle,String explanation)throws BadLocationException
     {
-        String lineSeparator=System.getProperty("line.separator");
+        String lineSeparator = System.getProperty("line.separator");
 
-        SimpleAttributeSet attrset=new SimpleAttributeSet();
-        Document document=textPane.getDocument();
+        SimpleAttributeSet attrset = new SimpleAttributeSet();
+        Document document = textPane.getDocument();
+
         /*display websiteTitle*/
         StyleConstants.setFontSize(attrset, bigFont.getSize());
         StyleConstants.setFontFamily(attrset, bigFont.getFontName());
-        StyleConstants.setForeground(attrset,Color.BLUE);
-        try{
-            document.insertString(document.getLength(), websiteTitle+lineSeparator, attrset);
-        }catch (BadLocationException ble) {
-            // TODO: handle exception
-            System.out.println("BadLocationException:"+ble);
+        StyleConstants.setForeground(attrset, myColor);
+        document.insertString(document.getLength(), websiteTitle + spaceContent, attrset);
+
+        /*like button*/
+        JButton likeButton;
+        if (isLike[index]) {
+            likeButton = new JButton(likeImageIcon);
+            likeButton.setPreferredSize(new Dimension(10, 22));
+            likeButton.setToolTipText("取消");
+        } else {
+            likeButton = new JButton(dislikeImageIcon);
+            likeButton.setPreferredSize(new Dimension(10, 22));
+            likeButton.setToolTipText("点赞");
         }
-        /*display wordOrPhrase and explanation*/
+        likeButton.setContentAreaFilled(false);
+        likeButton.setFocusPainted(false);
+        likeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isLike[index]=!isLike[index];
+                displayWordExplanations(curWordOrPhrase);
+            }
+        });
+        textPane.insertComponent(likeButton);
+
+        /*fold button*/
+        JButton foldButton;
+        if (isUnfold[index]) {
+            foldButton = new JButton(foldIamgeIcon);
+            foldButton.setPreferredSize(new Dimension(10, 22));
+            foldButton.setToolTipText("收起");
+        } else {
+            foldButton = new JButton(unfoldIamgeIcon);
+            foldButton.setPreferredSize(new Dimension(10, 22));
+            foldButton.setToolTipText("展开");
+        }
+        foldButton.setContentAreaFilled(false);
+        foldButton.setFocusPainted(false);
+        foldButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isUnfold[index]=!isUnfold[index];
+                displayWordExplanations(curWordOrPhrase);
+            }
+        });
+        textPane.insertComponent(foldButton);
+
+        /*line*/
+        StyleConstants.setFontSize(attrset, 2);
+        document.insertString(document.getLength(), lineSeparator + line + lineSeparator, attrset);
+
+        if (isUnfold[index]) {
+        /*display wordOrPhrase */
+            StyleConstants.setFontSize(attrset, smallFont.getSize());
+            StyleConstants.setFontFamily(attrset, smallFont.getFontName());
+            StyleConstants.setForeground(attrset, Color.RED);
+            document.insertString(document.getLength(), curWordOrPhrase + lineSeparator, attrset);
+
+        /*display explanation*/
+            StyleConstants.setForeground(attrset, Color.BLACK);
+            document.insertString(document.getLength(), explanation + lineSeparator, attrset);
+        }
         StyleConstants.setFontSize(attrset, smallFont.getSize());
-        StyleConstants.setFontFamily(attrset, smallFont.getFontName());
-        StyleConstants.setForeground(attrset,Color.BLACK);
-        try{
-            document.insertString(document.getLength(), wordOrPhrase+lineSeparator+" "+explanation+lineSeparator, attrset);
-        }catch (BadLocationException ble) {
-            // TODO: handle exception
-            System.out.println("BadLocationException:"+ble);
-        }
+        document.insertString(document.getLength(),lineSeparator, attrset);
     }
 
     /*the interface with the server*/
@@ -114,10 +217,11 @@ public class ContentPanel extends JPanel{
     {
         //to complete!
         String[] explanations=new String[3];
-        explanations[0]="sadddddddddddddddddddddfff fffffasdasasafffff sfaassssssssssssssssssssssssssssssssssss";
+        //explanations[0]="sadddddddddddddddddddddfff fffffasdasasafffff sfaassssssssssssssssssssssssssssssssssss";
         //explanations[0]="我我我我我我我我我我我我我 我我我我我我我我我我 我我我我我我我我我我我我我我我";
-        explanations[1]="youdao explanation\nA\nB";
-        explanations[2]="jinshan explanation\nA\nB";
+        explanations[0]="   baidu explanation\n   start\n\n   end";
+        explanations[1]="   youdao explanation\n   start\n\n   end";
+        explanations[2]="   jinshan explanation\n   start\n\n   end";
         return explanations;
     }
     //get the popularity of the WordOrPhrase of three websites.

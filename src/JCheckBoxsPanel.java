@@ -28,7 +28,7 @@ public class JCheckBoxsPanel extends JPanel{
         baiduPanel.add(baidu);
         add(baiduPanel);
 
-        JCheckBox youdao=new JCheckBox("有道");
+        JCheckBox youdao=new JCheckBox("有道",true);
         youdao.setFont(font);
         //youdao.setBackground(Color.WHITE);
         youdao.setFocusPainted(false);
