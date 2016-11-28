@@ -28,7 +28,16 @@ public class ContentPanel extends JPanel{
         return textPane;
     }
     private JScrollPane jScrollPane;//the outside JScrollPane
-    int resetValue=0;//reset jScrollPane
+    int resetCaretPosition=0;//reset jScrollPane
+    int[] resetLikeCaretPositions={0,0,0};//record three possible like reset positions
+    int[] resetFoldCaretPositions={0,0,0};//record three possible fold reset positions
+    private void renewResetCaretPositions()
+    {
+        resetCaretPosition=0;
+        for(int i=0;i<3;i++) {
+            resetLikeCaretPositions[i]=resetFoldCaretPositions[i]=0;
+        }
+    }
 
     /*(un)fold imageIcons*/
     boolean[] isUnfold={true,true,true};//initial unfold
@@ -61,8 +70,10 @@ public class ContentPanel extends JPanel{
     public void setSelectedItem(int index,boolean isSelected)
     {
         selectedItem[index]=isSelected;
-        if(curWordOrPhrase!=null)
+        if(curWordOrPhrase!=null) {
+            renewResetCaretPositions();
             displayWordExplanations(curWordOrPhrase);
+        }
     }
 
     //constructor
@@ -88,23 +99,14 @@ public class ContentPanel extends JPanel{
         );
 
     }
+
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        //jScrollPane.getVerticalScrollBar().setValue(resetValue);
-        System.out.println(jScrollPane.getVerticalScrollBar().getValue());
     }
+
     public void setJScrollPane(JScrollPane jScrollPane) {
         this.jScrollPane = jScrollPane;
-        JScrollBar vBar = this.jScrollPane.getVerticalScrollBar();
-        vBar.addAdjustmentListener(new AdjustmentListener() {
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                //System.out.println(e.getValue());
-                //System.out.println(vBar.getMaximum());
-                //if(e.getValue()==vBar.getValue())
-                    ;
-            }
-        });
     }
 
     public void displayWordExplanations(String wordOrPhrase)
@@ -116,6 +118,7 @@ public class ContentPanel extends JPanel{
             displayOrder=getDisplayOrder(curWordOrPhrase);
             renewIsLike();
             renewIsUnfold();
+            renewResetCaretPositions();
         }
         textPane.setText("");//clear textPane
         textPane.removeAll();
@@ -133,6 +136,7 @@ public class ContentPanel extends JPanel{
                 }
             }
         }
+        textPane.setCaretPosition(resetCaretPosition);
     }
     /* display a website result in textPane using font.*/
     private void printAWebsiteResultOnTextpane(int index,String websiteTitle,String explanation)throws BadLocationException
@@ -164,11 +168,17 @@ public class ContentPanel extends JPanel{
         likeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(isLike[index])
+                    System.out.println("取消点赞");
+                else
+                    System.out.println("点赞");
                 isLike[index]=!isLike[index];
+                resetCaretPosition=resetLikeCaretPositions[index];
                 displayWordExplanations(curWordOrPhrase);
             }
         });
         textPane.insertComponent(likeButton);
+        resetLikeCaretPositions[index]=textPane.getCaretPosition();
 
         /*fold button*/
         JButton foldButton;
@@ -186,11 +196,18 @@ public class ContentPanel extends JPanel{
         foldButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(isUnfold[index])
+                    System.out.println("收起");
+                else
+                    System.out.println("展开");
                 isUnfold[index]=!isUnfold[index];
+                resetCaretPosition=resetFoldCaretPositions[index];
                 displayWordExplanations(curWordOrPhrase);
             }
         });
         textPane.insertComponent(foldButton);
+        resetFoldCaretPositions[index]=textPane.getCaretPosition();
+        //System.out.println(textPane.getCaretPosition());
 
         /*line*/
         StyleConstants.setFontSize(attrset, 2);
