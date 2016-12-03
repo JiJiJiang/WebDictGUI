@@ -105,7 +105,7 @@ public class InputFieldPanel extends JPanel{
                 if(!isACompleteWord) {
                     cbInput.setSelectedItem(null);
                     contentPanel.getTextPane().setText("");//clear extPane
-                    contentPanel.getTextPane().removeAll();
+                    //contentPanel.getTextPane().removeAll();
                 }
                 cbInput.setPopupVisible(false);//set cbInput invisible
                 if(model.getSize() > 0)
@@ -195,8 +195,8 @@ public class InputFieldPanel extends JPanel{
 
         /*searchButton*/
         searchButton.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e)
-            {
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 if (!isAdjusting(cbInput))
                 {
                     if(cbInput.getSelectedIndex()>=0)//matched item in cbInput

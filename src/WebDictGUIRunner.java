@@ -12,7 +12,7 @@ import javax.swing.*;
 
 public class WebDictGUIRunner extends JFrame{
 	private final static int FRAME_WIDTH=580;
-	private final static int FRAME_HEIGHT=420;
+	private final static int FRAME_HEIGHT=440;
 
     //constructor
     public WebDictGUIRunner()
@@ -39,6 +39,7 @@ public class WebDictGUIRunner extends JFrame{
         WebDictGUIRunner frame=new WebDictGUIRunner();
         frame.setTitle("WebDict");
         frame.setSize(FRAME_WIDTH,FRAME_HEIGHT);
+        frame.setMinimumSize(new Dimension(FRAME_WIDTH-50,FRAME_HEIGHT-50));
         //frame.setLocation(200, 100);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

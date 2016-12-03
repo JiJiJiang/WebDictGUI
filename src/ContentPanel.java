@@ -28,6 +28,8 @@ public class ContentPanel extends JPanel{
         return textPane;
     }
     private JScrollPane jScrollPane;//the outside JScrollPane
+    boolean isToResetZero=false;//need to resetCaretPosition
+    int preWidth=0;//the previous width of contentPane
     int resetCaretPosition=0;//reset jScrollPane
     int[] resetLikeCaretPositions={0,0,0};//record three possible like reset positions
     int[] resetFoldCaretPositions={0,0,0};//record three possible fold reset positions
@@ -63,8 +65,8 @@ public class ContentPanel extends JPanel{
     int[] displayOrder;
 
     /*websites*/
-    String line="";
-    String spaceContent="                                                             ";
+    String line;
+    String spaceContent;
     String[] websiteTitle={"百度","有道","金山"};
     boolean[] selectedItem={false,true,false};//store items chosen by the user.
     public void setSelectedItem(int index,boolean isSelected)
@@ -79,7 +81,6 @@ public class ContentPanel extends JPanel{
     //constructor
     public ContentPanel()
     {
-        for(int i=0;i<40;i++) line+="_____________";
         textPane.setBackground(textPaneColor);
         textPane.setEditable(false);//set it uneditable
         //textPane.setBorder(new LineBorder(myColor,1));
@@ -103,6 +104,19 @@ public class ContentPanel extends JPanel{
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        //redraw the blue line
+        if(curWordOrPhrase!=null&&preWidth!=jScrollPane.getWidth())
+        {
+            //reset the length of line and spaceContent
+            line="";
+            for(int i=0;i<textPane.getWidth()-25;i++) line+="_";
+            spaceContent="";
+            for(int i=0;i<textPane.getWidth()-175;i++) spaceContent+=" ";
+            isToResetZero=true;
+            displayWordExplanations(curWordOrPhrase);
+            isToResetZero=false;
+            preWidth=jScrollPane.getWidth();
+        }
     }
 
     public void setJScrollPane(JScrollPane jScrollPane) {
@@ -121,9 +135,7 @@ public class ContentPanel extends JPanel{
             renewResetCaretPositions();
         }
         textPane.setText("");//clear textPane
-        textPane.removeAll();
-        //textPane.updateUI();
-        //textPane.repaint();
+        //textPane.removeAll();
 
         //baidu,youdao and jinshan.
         for(int i=0;i<3;i++) {
@@ -136,7 +148,7 @@ public class ContentPanel extends JPanel{
                 }
             }
         }
-        textPane.setCaretPosition(resetCaretPosition);
+        textPane.setCaretPosition(isToResetZero?0:resetCaretPosition);
     }
     /* display a website result in textPane using font.*/
     private void printAWebsiteResultOnTextpane(int index,String websiteTitle,String explanation)throws BadLocationException
@@ -150,7 +162,11 @@ public class ContentPanel extends JPanel{
         StyleConstants.setFontSize(attrset, bigFont.getSize());
         StyleConstants.setFontFamily(attrset, bigFont.getFontName());
         StyleConstants.setForeground(attrset, myColor);
-        document.insertString(document.getLength(), websiteTitle + spaceContent, attrset);
+        document.insertString(document.getLength(), websiteTitle, attrset);
+
+        /*spaceContent*/
+        StyleConstants.setFontSize(attrset, 2);
+        document.insertString(document.getLength(), spaceContent, attrset);
 
         /*like button*/
         JButton likeButton;
@@ -207,7 +223,6 @@ public class ContentPanel extends JPanel{
         });
         textPane.insertComponent(foldButton);
         resetFoldCaretPositions[index]=textPane.getCaretPosition();
-        //System.out.println(textPane.getCaretPosition());
 
         /*line*/
         StyleConstants.setFontSize(attrset, 2);
@@ -236,9 +251,9 @@ public class ContentPanel extends JPanel{
         String[] explanations=new String[3];
         //explanations[0]="sadddddddddddddddddddddfff fffffasdasasafffff sfaassssssssssssssssssssssssssssssssssss";
         //explanations[0]="我我我我我我我我我我我我我 我我我我我我我我我我 我我我我我我我我我我我我我我我";
-        explanations[0]="   baidu explanation\n   start\n\n   end";
-        explanations[1]="   youdao explanation\n   start\n\n   end";
-        explanations[2]="   jinshan explanation\n   start\n\n   end";
+        explanations[0]="   baidu explanation\n   start\n\n\n\n   end";
+        explanations[1]="   youdao explanation\n   start\n\n\n\n   end";
+        explanations[2]="   jinshan explanation\n   start\n\n\n\n   end";
         return explanations;
     }
     //get the popularity of the WordOrPhrase of three websites.
