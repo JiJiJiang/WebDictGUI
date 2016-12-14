@@ -20,7 +20,7 @@ public class JCheckBoxsPanel extends JPanel{
         //setBackground(Color.WHITE);
 
         /*set up three JCheckBox*/
-        JCheckBox baidu=new JCheckBox("百度");
+        JCheckBox baidu=new JCheckBox("百度",true);
         baidu.setFont(font);
         //baidu.setBackground(Color.WHITE);
         baidu.setFocusPainted(false);
@@ -36,7 +36,7 @@ public class JCheckBoxsPanel extends JPanel{
         youdaoPanel.add(youdao);
         add(youdaoPanel);
 
-        JCheckBox jinshan=new JCheckBox("金山");
+        JCheckBox jinshan=new JCheckBox("金山",true);
         jinshan.setFont(font);
         //jinshan.setBackground(Color.WHITE);
         jinshan.setFocusPainted(false);

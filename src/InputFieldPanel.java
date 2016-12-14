@@ -3,15 +3,18 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 /**
  * Created by 77 on 2016/11/26.
  */
 public class InputFieldPanel extends JPanel{
     private final int MAX_ROW_COUNT=6;//下拉框最大显示的行数
-    //private final int MAX_COUNT=10;
+    private String[] associationalWords=new String[MAX_ROW_COUNT];
+    int realRowCount=0;
 
     private final Color myColor=new Color(39,154,235);//天蓝色
     private final Font font=new Font("Serif",Font.ITALIC,15);//字体
@@ -90,22 +93,22 @@ public class InputFieldPanel extends JPanel{
             //更新下拉框的内容
             private void updateList()
             {
+                contentPanel.getTextPane().setText("");//clear textPane
                 setAdjusting(cbInput, true);//set cbInput changeable
                 model.removeAllElements();
+                realRowCount=0;
                 String input = textInput.getText().trim();//delete the space at both ends
                 if (!input.isEmpty())
                 {
                     //get all associational words from the server
-                    String[] associationalWords=getAssocitionalWords(input);
-                    for(String word:associationalWords)
-                        model.addElement(word);
+                    getAssocitionalWords(input);
+                    for(int i=0;i<realRowCount;i++) {
+                        model.addElement(associationalWords[i]);
+                    }
                 }
-
-                boolean isACompleteWord=false;//modify it!!!
+                boolean isACompleteWord=(realRowCount!=0&&associationalWords[0].equals(input));
                 if(!isACompleteWord) {
                     cbInput.setSelectedItem(null);
-                    contentPanel.getTextPane().setText("");//clear extPane
-                    //contentPanel.getTextPane().removeAll();
                 }
                 cbInput.setPopupVisible(false);//set cbInput invisible
                 if(model.getSize() > 0)
@@ -133,11 +136,10 @@ public class InputFieldPanel extends JPanel{
                         //display in textInput and textPane
                         if(cbInput.getSelectedIndex()>=0)//matched item in cbInput
                         {
-                            String[] tokens=cbInput.getSelectedItem().toString().split("\t");
-                            textInput.setText(tokens[0]);//textInput
+                            String word=cbInput.getSelectedItem().toString();
+                            textInput.setText(word);//textInput
                             //textPane
-                            contentPanel.displayWordExplanations(tokens[0]);
-
+                            contentPanel.displayWordExplanations(word);
                         }
                         else//unmatch any item in cbInput,print error message.
                         {
@@ -163,7 +165,7 @@ public class InputFieldPanel extends JPanel{
                         {
                             if(cbInput.getSelectedItem()!=null)//有已选项
                             {
-                                String[] tokens=cbInput.getSelectedItem().toString().split("\t");
+                                String word=cbInput.getSelectedItem().toString();
                                 //textInput.setText(tokens[0]);//textInput
                                 //handleSearchResult(textPane,false,tokens[0],tokens[1].trim());//textPane
                             }
@@ -185,9 +187,9 @@ public class InputFieldPanel extends JPanel{
                     if (cbInput.getSelectedItem() != null)
                     {
                         //textInput,textPane
-                        String[] tokens=cbInput.getSelectedItem().toString().split("\t");
-                        textInput.setText(tokens[0]);//textInput
-                        contentPanel.displayWordExplanations(tokens[0]);//textPane
+                        String word=cbInput.getSelectedItem().toString();
+                        textInput.setText(word);//textInput
+                        contentPanel.displayWordExplanations(word);//textPane
                     }
                 }
             }
@@ -202,9 +204,9 @@ public class InputFieldPanel extends JPanel{
                     if(cbInput.getSelectedIndex()>=0)//matched item in cbInput
                     {
                         //display in textInput,textPane
-                        String[] tokens=cbInput.getSelectedItem().toString().split("\t");
-                        textInput.setText(tokens[0]);//textInput
-                        contentPanel.displayWordExplanations(tokens[0]);//textPane
+                        String word=cbInput.getSelectedItem().toString();
+                        textInput.setText(word);//textInput
+                        contentPanel.displayWordExplanations(word);//textPane
                     }
                     else
                     {
@@ -249,18 +251,22 @@ public class InputFieldPanel extends JPanel{
         textInput.setSize(new Dimension(getWidth()-100-6*2,textInput.getHeight()));
     }
 
-    /*the interface with the server*/
-    //get the associational words from the server
-    String[] getAssocitionalWords(String input)
+    /*use the local dictionary file*/
+    void getAssocitionalWords(String input)
     {
-        //to complete
-        String[] words=new String[6];
-        words[0]="baidu-associational-word1";
-        words[1]="baidu-associational-word2";
-        words[2]="youdao-associational-word1";
-        words[3]="youdao-associational-word2";
-        words[4]="jinshan-associational-word1";
-        words[5]="jinshan-associational-word2";
-        return words;
+        //折半查找找到可能符合条件的第一个单词（短语）的下标
+        int begin=ReadDictionary.binarySearch(input);
+        ArrayList<String> wordOrPhraseArray=ReadDictionary.getDictionary();
+        while(true)
+        {
+            //若单词达到最大个数或者不是以input开头，结束增加下拉框
+            if(realRowCount>=MAX_ROW_COUNT
+                ||!wordOrPhraseArray.get(begin+realRowCount).toLowerCase().startsWith(input.toLowerCase())) {
+                break;
+            }
+            associationalWords[realRowCount]=wordOrPhraseArray.get(begin+realRowCount);
+            realRowCount++;
+        }
+        //System.out.println(realRowCount);
     }
 }

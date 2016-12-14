@@ -9,7 +9,6 @@
 import java.awt.*;
 import javax.swing.*;
 
-
 public class WebDictGUIRunner extends JFrame{
 	private final static int FRAME_WIDTH=580;
 	private final static int FRAME_HEIGHT=440;
@@ -44,5 +43,8 @@ public class WebDictGUIRunner extends JFrame{
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+
+        //initial the dictionary
+        ReadDictionary.initialDictionary();
     }
 }

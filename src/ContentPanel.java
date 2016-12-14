@@ -3,10 +3,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
-import java.security.acl.Group;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+import org.json.*;
 
 /**
  * Created by 77 on 2016/11/26.
@@ -17,7 +17,8 @@ public class ContentPanel extends JPanel{
     private final Color textPaneColor=new Color(242, 242, 242);//textPane背景色
 
     /*fonts*/
-    private final Font smallFont=new Font("Serif",Font.ITALIC,18);//字体
+    private final Font smallFont=new Font("Serif",Font.BOLD,16);//小字体
+    private final Font middleFont=new Font("Serif",Font.ITALIC,18);//中字体
     private final Font bigFont=new Font("SanSerif", Font.ITALIC, 22);//大字体
 
     /*components*/
@@ -68,7 +69,7 @@ public class ContentPanel extends JPanel{
     String line;
     String spaceContent;
     String[] websiteTitle={"百度","有道","金山"};
-    boolean[] selectedItem={false,true,false};//store items chosen by the user.
+    boolean[] selectedItem={true,true,true};//store items chosen by the user.
     public void setSelectedItem(int index,boolean isSelected)
     {
         selectedItem[index]=isSelected;
@@ -230,12 +231,14 @@ public class ContentPanel extends JPanel{
 
         if (isUnfold[index]) {
         /*display wordOrPhrase */
-            StyleConstants.setFontSize(attrset, smallFont.getSize());
-            StyleConstants.setFontFamily(attrset, smallFont.getFontName());
+            StyleConstants.setFontSize(attrset, middleFont.getSize());
+            StyleConstants.setFontFamily(attrset, middleFont.getFontName());
             StyleConstants.setForeground(attrset, Color.RED);
             document.insertString(document.getLength(), curWordOrPhrase + lineSeparator, attrset);
 
         /*display explanation*/
+            StyleConstants.setFontSize(attrset, smallFont.getSize());
+            StyleConstants.setFontFamily(attrset, smallFont.getFontName());
             StyleConstants.setForeground(attrset, Color.BLACK);
             document.insertString(document.getLength(), explanation + lineSeparator, attrset);
         }
@@ -247,13 +250,47 @@ public class ContentPanel extends JPanel{
     //get the explanations of input from the server
     private String[] getExplanations(String wordOrPhrase)
     {
-        //to complete!
-        String[] explanations=new String[3];
-        //explanations[0]="sadddddddddddddddddddddfff fffffasdasasafffff sfaassssssssssssssssssssssssssssssssssss";
-        //explanations[0]="我我我我我我我我我我我我我 我我我我我我我我我我 我我我我我我我我我我我我我我我";
-        explanations[0]="   baidu explanation\n   start\n\n\n\n   end";
-        explanations[1]="   youdao explanation\n   start\n\n\n\n   end";
-        explanations[2]="   jinshan explanation\n   start\n\n\n\n   end";
+        URL url=null;
+        Scanner input=null;
+        String jsonResult="";
+        try{
+            url=new URL("http://115.159.0.12:8080/q?word="+wordOrPhrase+"&baidu=true&youdao=true&jinshan=true");
+            input=new Scanner(url.openStream());
+            while(input.hasNextLine()) {
+                jsonResult+=input.nextLine();
+            }
+            System.out.println(jsonResult);
+        }
+        catch(MalformedURLException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        catch(IOException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        finally{
+            input.close();
+        }
+
+        String[] explanations = new String[3];
+        JSONObject all=new JSONObject(jsonResult);
+        String jsonWord=all.getString("word");
+        if(jsonWord.equals(wordOrPhrase)) {
+            JSONArray jsonExplanations=all.getJSONArray("explanations");
+            for (int i = 0; i < 3; i++) {
+                JSONObject jsonObject=jsonExplanations.getJSONObject(i);
+                String status=jsonObject.getString("status");
+                if(status.equals("success"))
+                {
+                    String enPhonetic=jsonObject.getString("enPhonetic");
+                    String usPhonetic=jsonObject.getString("usPhonetic");
+                    String translation=jsonObject.getString("translation");
+                    explanations[i]="英 ["+enPhonetic+"]\n美 ["+usPhonetic+"]\n译: "+translation;
+                }
+            }
+        }
+
         return explanations;
     }
     //get the popularity of the WordOrPhrase of three websites.
