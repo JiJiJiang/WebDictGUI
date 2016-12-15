@@ -62,8 +62,9 @@ public class ContentPanel extends JPanel{
 
     /*from the server*/
     String curWordOrPhrase=null;
-    String[] explanations;
-    int[] displayOrder;
+    String[] explanations= new String[3];//单词解释
+    int[] likes=new int[3];//点赞次数
+    int[] displayOrder=new int[3];//打印顺序
 
     /*websites*/
     String line;
@@ -129,8 +130,8 @@ public class ContentPanel extends JPanel{
         if(this.curWordOrPhrase!=wordOrPhrase)//first search this word
         {
             this.curWordOrPhrase=wordOrPhrase;
-            explanations=getExplanations(curWordOrPhrase);
-            displayOrder=getDisplayOrder(curWordOrPhrase);
+            getExplanationsAndLikes(curWordOrPhrase);
+            getDisplayOrder(curWordOrPhrase);
             renewIsLike();
             renewIsUnfold();
             renewResetCaretPositions();
@@ -172,11 +173,11 @@ public class ContentPanel extends JPanel{
         /*like button*/
         JButton likeButton;
         if (isLike[index]) {
-            likeButton = new JButton(likeImageIcon);
+            likeButton = new JButton(likes[index]+1+"",likeImageIcon);
             likeButton.setPreferredSize(new Dimension(10, 22));
             likeButton.setToolTipText("取消");
         } else {
-            likeButton = new JButton(dislikeImageIcon);
+            likeButton = new JButton(likes[index]+"",dislikeImageIcon);
             likeButton.setPreferredSize(new Dimension(10, 22));
             likeButton.setToolTipText("点赞");
         }
@@ -247,14 +248,14 @@ public class ContentPanel extends JPanel{
     }
 
     /*the interface with the server*/
-    //get the explanations of input from the server
-    private String[] getExplanations(String wordOrPhrase)
+    //get the explanations and likes of input from the server
+    private void getExplanationsAndLikes(String wordOrPhrase)
     {
         URL url=null;
         Scanner input=null;
         String jsonResult="";
         try{
-            url=new URL("http://115.159.0.12:8080/q?word="+wordOrPhrase+"&baidu=true&youdao=true&jinshan=true");
+            url=new URL("http://115.159.0.12:8080/q?word="+wordOrPhrase.replace(' ','+')+"&baidu=true&youdao=true&jinshan=true");
             input=new Scanner(url.openStream());
             while(input.hasNextLine()) {
                 jsonResult+=input.nextLine();
@@ -273,7 +274,6 @@ public class ContentPanel extends JPanel{
             input.close();
         }
 
-        String[] explanations = new String[3];
         JSONObject all=new JSONObject(jsonResult);
         String jsonWord=all.getString("word");
         if(jsonWord.equals(wordOrPhrase)) {
@@ -283,36 +283,26 @@ public class ContentPanel extends JPanel{
                 String status=jsonObject.getString("status");
                 if(status.equals("success"))
                 {
+                    String source=jsonObject.getString("source");
+                    int index;
+                    if(source.equals("baidu"))
+                        index=0;
+                    else if(source.equals("youdao"))
+                        index=1;
+                    else
+                        index=2;
                     String enPhonetic=jsonObject.getString("enPhonetic");
                     String usPhonetic=jsonObject.getString("usPhonetic");
                     String translation=jsonObject.getString("translation");
-                    explanations[i]="英 ["+enPhonetic+"]\n美 ["+usPhonetic+"]\n译: "+translation;
+                    explanations[index]="英 ["+enPhonetic+"]\n美 ["+usPhonetic+"]\n译: "+translation;
+                    likes[index]=jsonObject.getInt("likes");
                 }
             }
         }
-
-        return explanations;
-    }
-    //get the popularity of the WordOrPhrase of three websites.
-    private int[] getPopularities(String wordOrPhrase)
-    {
-        //to complete
-        int[] popularities=new int[3];
-        popularities[0]=(int)(Math.random()*10);
-        popularities[1]=(int)(Math.random()*10);
-        popularities[2]=(int)(Math.random()*10);
-        return popularities;
     }
     //get the display order of "baidu,youdao and jinshan" according to their popularity
-    private int[] getDisplayOrder(String wordOrPhrase)
+    private void getDisplayOrder(String wordOrPhrase)
     {
-        int[] popularities=getPopularities(wordOrPhrase);
-        /*
-        for(int popularity:popularities)
-            System.out.print(popularity+" ");
-        System.out.println();
-        */
-        int[] displayOrder=new int[3];
         boolean[] isUesd={false,false,false};
 
         for(int i=0;i<3;i++)
@@ -321,21 +311,14 @@ public class ContentPanel extends JPanel{
             int maxValue=-1;
             for(int j=0;j<3;j++)
             {
-                if (!isUesd[j] && popularities[j] > maxValue)
+                if (!isUesd[j] && likes[j] > maxValue)
                 {
                     maxIndex=j;
-                    maxValue=popularities[maxIndex];
+                    maxValue=likes[maxIndex];
                 }
             }
             displayOrder[i]=maxIndex;
             isUesd[maxIndex]=true;
         }
-
-        /*
-        for(int order:displayOrder)
-            System.out.print(order+" ");
-        System.out.println();
-        */
-        return displayOrder;
     }
 }

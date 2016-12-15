@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
  * Created by 77 on 2016/11/26.
  */
 public class TitlePanel extends JPanel{
+    private JFrame userFrame=new JFrame();//登录的frame
+    private UserPanel userPanel=new UserPanel();//登录的panel
     //constructor
     public TitlePanel()
     {
@@ -28,6 +30,7 @@ public class TitlePanel extends JPanel{
         login.setBorderPainted(false);
         login.setPreferredSize(new Dimension(25,25));
         login.setFocusPainted(false);
+        login.setToolTipText("用户窗口");
         /*create a left panel to put webDictLabel and loginButton*/
         JPanel leftPanel=new JPanel(new FlowLayout(FlowLayout.RIGHT,0,0));
         leftPanel.setBackground(myColor);
@@ -49,14 +52,25 @@ public class TitlePanel extends JPanel{
         rightPanel.add(share);
         add(rightPanel,BorderLayout.CENTER);
 
+        //初始化登录的frame
+        userFrame.setTitle("用户窗口");
+        userFrame.setSize(250,300);
+        userFrame.setLocationRelativeTo(null);
+        userFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//只关闭该窗口
+        userFrame.setVisible(false);
+        userFrame.setResizable(false);
+        userFrame.add(userPanel);
+
         /*add all listeners here.*/
         /*login*/
-        login.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Handle Login!");
-            }
-        });
+        login.addActionListener(new UserListener());
         /*share*/
+    }
+    private class UserListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e) {
+            //System.out.println("Handle Login!");
+            userFrame.setVisible(true);
+        }
     }
 }

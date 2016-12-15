@@ -134,42 +134,17 @@ public class InputFieldPanel extends JPanel{
                     {
                         //put the content of the item into the textField!
                         //display in textInput and textPane
-                        if(cbInput.getSelectedIndex()>=0)//matched item in cbInput
-                        {
-                            String word=cbInput.getSelectedItem().toString();
+                        String word;
+                        if(cbInput.getSelectedIndex()>=0) {
+                            word = cbInput.getSelectedItem().toString();
                             textInput.setText(word);//textInput
-                            //textPane
-                            contentPanel.displayWordExplanations(word);
                         }
-                        else//unmatch any item in cbInput,print error message.
-                        {
-                            String errorWordOrPhrase=textInput.getText();
-                            if(errorWordOrPhrase.trim().length()!=0)
-                            {
-                                /*
-                                if(correctionItem.size()==0)
-                                    handleSearchResult(textPane,true,errorWordOrPhrase,"没有找到\""+errorWordOrPhrase+"\"相关的英汉翻译结果");//textPane
-                                else
-                                {
-                                    handleSearchResult(textPane,true,errorWordOrPhrase,"");//textPane
-                                    printCorrectionItem(textPane);
-                                }
-                                */
-                            }
-                        }
+                        else
+                            word=textInput.getText();
+                        //textPane
+                        if(word.length()!=0) contentPanel.displayWordExplanations(word);
+
                         cbInput.setPopupVisible(false);//将下拉框置为不可见
-                    }
-                    else//UP和DOWN
-                    {
-                        if(model.getSize()>0&&cbInput.isPopupVisible())//下拉框中有推荐项且是可见的
-                        {
-                            if(cbInput.getSelectedItem()!=null)//有已选项
-                            {
-                                String word=cbInput.getSelectedItem().toString();
-                                //textInput.setText(tokens[0]);//textInput
-                                //handleSearchResult(textPane,false,tokens[0],tokens[1].trim());//textPane
-                            }
-                        }
                     }
                 }
                 setAdjusting(cbInput, false);//关闭修改下拉框
@@ -201,29 +176,15 @@ public class InputFieldPanel extends JPanel{
             public void mouseClicked(MouseEvent e) {
                 if (!isAdjusting(cbInput))
                 {
-                    if(cbInput.getSelectedIndex()>=0)//matched item in cbInput
-                    {
-                        //display in textInput,textPane
-                        String word=cbInput.getSelectedItem().toString();
+                    String word;
+                    if(cbInput.getSelectedIndex()>=0) {
+                        word = cbInput.getSelectedItem().toString();
                         textInput.setText(word);//textInput
-                        contentPanel.displayWordExplanations(word);//textPane
                     }
                     else
-                    {
-                        String errorWordOrPhrase=textInput.getText();
-                        if(errorWordOrPhrase.trim().length()!=0)
-                        {
-                            /*
-                            if(correctionItem.size()==0)
-                                handleSearchResult(textPane,true,errorWordOrPhrase,"没有找到\""+errorWordOrPhrase+"\"相关的英汉翻译结果");//textPane
-                            else
-                            {
-                                handleSearchResult(textPane,true,errorWordOrPhrase,"");//textPane
-                                printCorrectionItem(textPane);
-                            }
-                            */
-                        }
-                    }
+                        word=textInput.getText();
+                    //textPane
+                    if(word.length()!=0) contentPanel.displayWordExplanations(word);
                     cbInput.setPopupVisible(false);
                 }
             }
