@@ -195,10 +195,12 @@ public class UserPanel extends JPanel{
                         if (status)//用户刚刚登陆成功
                         {
                             statusLabel.setIcon(onlineIcon);
+                            statusLabel.setToolTipText("在线状态");
                             userListPanel.setVisible(true);
                         } else//用户刚刚注销
                         {
                             statusLabel.setIcon(offlineIcon);
+                            statusLabel.setToolTipText("离线状态");
                             userListPanel.setVisible(false);
                         }
                     }
