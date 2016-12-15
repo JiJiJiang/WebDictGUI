@@ -52,7 +52,7 @@ public class TitlePanel extends JPanel{
         rightPanel.add(share);
         add(rightPanel,BorderLayout.CENTER);
 
-        //初始化登录的frame
+        //初始化用户的frame
         userFrame.setTitle("用户窗口");
         userFrame.setSize(250,300);
         userFrame.setLocationRelativeTo(null);

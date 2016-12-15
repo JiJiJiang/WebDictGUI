@@ -1,31 +1,31 @@
 /**
  * Created by 77 on 2016/12/15.
  */
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
-public class LoginPanel extends JPanel{
+public class RegisterPanel extends JPanel{
     JFrame outFrame=null;
-    int[] statusChange=null;
-
     JTextField userName=null;
     JPasswordField password=null;
+    JPasswordField passwordConfirm=null;
 
-    public LoginPanel()
+    public RegisterPanel()
     {
         //upPanel
         JPanel upPanel=new JPanel();
-        upPanel.setLayout(new GridLayout(2,2,5,5));
+        upPanel.setLayout(new GridLayout(3,2,5,5));
         upPanel.add(new JLabel("用户名:"));
         userName=new JTextField(20);
         upPanel.add(userName);
         upPanel.add(new JLabel("密码："));
         password=new JPasswordField(20);
         upPanel.add(password);
+        upPanel.add(new JLabel("确认密码："));
+        passwordConfirm=new JPasswordField(20);
+        upPanel.add(passwordConfirm);
         add(upPanel,BorderLayout.CENTER);
 
         //downPanel
@@ -40,51 +40,39 @@ public class LoginPanel extends JPanel{
         confirm.addActionListener(new ConfrimListener());
         cancel.addActionListener(new CancelListener());
     }
-
     public void setFrame(JFrame frame)
     {
         outFrame=frame;
     }
-    public void setStatusChange(int[] statusChange)
-    {
-        this.statusChange=statusChange;
-    }
-
-    /*two listeners*/
     private class ConfrimListener implements ActionListener
     {
         public void actionPerformed(ActionEvent e) {
             String userNameString=new String(userName.getText().trim());
             String passwordString=new String(password.getPassword());
-            if(userNameString.length()==0||passwordString.length()==0)
+            //System.out.println(passwordString);
+            String passwordConfirmString=new String(passwordConfirm.getPassword());
+            //System.out.println(passwordConfirmString);
+            if(userNameString.length()==0||passwordString.length()==0||passwordConfirmString.length()==0)
                 JOptionPane.showMessageDialog(null, "输入栏不能为空！！", "错误",JOptionPane.ERROR_MESSAGE);
+            else if(!passwordString.equals(passwordConfirmString))
+                JOptionPane.showMessageDialog(null, "密码不一致", "错误",JOptionPane.ERROR_MESSAGE);
             else
             {
-                //建立url，发送登录请求给服务器
+                //建立url，发送注册请求给服务器
 
                 //得到返回结果
-
                 if(true)
                 {
                     //清空输入框
                     userName.setText("");
                     password.setText("");
+                    passwordConfirm.setText("");
                     outFrame.setVisible(false);
-                    synchronized (statusChange) {
-                        statusChange[0] = 1;
-                    }
-                    //更新在线和离线用户列表
-                    JOptionPane.showMessageDialog(null, "登录成功！", "提示",JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "注册成功，请登录！", "提示",JOptionPane.PLAIN_MESSAGE);
                 }
                 else
                 {
-                    String failReason="";
-                    if(failReason.equals("name"))//用户名不存在
-                        JOptionPane.showMessageDialog(null, "用户名不存在，请重新登录！", "错误",JOptionPane.ERROR_MESSAGE);
-                    else if(failReason.equals("password"))//密码错误
-                        JOptionPane.showMessageDialog(null, "密码错误，请重新登录！", "错误",JOptionPane.ERROR_MESSAGE);
-                    else
-                        JOptionPane.showMessageDialog(null, "该用户已经登录！！", "错误",JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "注册失败，请重新注册！", "提示",JOptionPane.PLAIN_MESSAGE);
                 }
             }
         }
