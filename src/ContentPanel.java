@@ -3,7 +3,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.*;
 import java.util.*;
 import org.json.*;
@@ -176,7 +179,7 @@ public class ContentPanel extends JPanel{
         for(int i=0;i<3;i++) {
             if (selectedItem[displayOrder[i]]) {
                 try {
-                    printAWebsiteResultOnTextpane(displayOrder[i],websiteTitle[displayOrder[i]],explanations[displayOrder[i]]);
+                    printAWebsiteResultOnTextpane(displayOrder[i]);
                 }catch (BadLocationException ble) {
                     // TODO: handle exception
                     System.out.println("BadLocationException:" + ble);
@@ -186,7 +189,7 @@ public class ContentPanel extends JPanel{
         textPane.setCaretPosition(isToResetZero?0:resetCaretPosition);
     }
     /* display a website result in textPane using font.*/
-    private void printAWebsiteResultOnTextpane(int index,String websiteTitle,String explanation)throws BadLocationException
+    private void printAWebsiteResultOnTextpane(int index)throws BadLocationException
     {
         String lineSeparator = System.getProperty("line.separator");
 
@@ -197,7 +200,7 @@ public class ContentPanel extends JPanel{
         StyleConstants.setFontSize(attrset, bigFont.getSize());
         StyleConstants.setFontFamily(attrset, bigFont.getFontName());
         StyleConstants.setForeground(attrset, myColor);
-        document.insertString(document.getLength(), websiteTitle, attrset);
+        document.insertString(document.getLength(), websiteTitle[index], attrset);
 
         /*spaceContent*/
         StyleConstants.setFontSize(attrset, 2);
@@ -206,13 +209,12 @@ public class ContentPanel extends JPanel{
         /*like button*/
         JButton likeButton;
         if (isLike[index]) {
-            likeButton = new JButton(likeImageIcon);
+            likeButton = new JButton(likes[index]+1+"",likeImageIcon);
             //likes[index]+1+"",
             likeButton.setPreferredSize(new Dimension(10, 22));
             likeButton.setToolTipText("取消");
         } else {
-            likeButton = new JButton(dislikeImageIcon);
-            //likes[index]+"",
+            likeButton = new JButton(likes[index]+"",dislikeImageIcon);
             likeButton.setPreferredSize(new Dimension(10, 22));
             likeButton.setToolTipText("点赞");
         }
@@ -221,18 +223,18 @@ public class ContentPanel extends JPanel{
         likeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                /*
                 if(isLike[index])
-                {
                     System.out.println("取消点赞");
-                }
-                else {
+                else
                     System.out.println("点赞");
-                }
+                */
                 //向服务器发送点赞和取消赞的请求
-
-                isLike[index]=!isLike[index];
-                resetCaretPosition=resetLikeCaretPositions[index];
-                displayWordExplanations(curWordOrPhrase);
+                if(sendLikeORDislike(index)) {
+                    isLike[index] = !isLike[index];
+                    resetCaretPosition = resetLikeCaretPositions[index];
+                    displayWordExplanations(curWordOrPhrase);
+                }
             }
         });
         textPane.insertComponent(likeButton);
@@ -281,7 +283,7 @@ public class ContentPanel extends JPanel{
             StyleConstants.setFontSize(attrset, smallFont.getSize());
             StyleConstants.setFontFamily(attrset, smallFont.getFontName());
             StyleConstants.setForeground(attrset, Color.BLACK);
-            document.insertString(document.getLength(), explanation + lineSeparator, attrset);
+            document.insertString(document.getLength(), explanations[index] + lineSeparator, attrset);
         }
         StyleConstants.setFontSize(attrset, smallFont.getSize());
         document.insertString(document.getLength(),lineSeparator, attrset);
@@ -360,5 +362,88 @@ public class ContentPanel extends JPanel{
             displayOrder[i]=maxIndex;
             isUesd[maxIndex]=true;
         }
+    }
+
+    //向服务器发送点赞或者取消赞的请求
+    boolean sendLikeORDislike(int index) {
+         URL url = null;
+        Scanner input = null;
+        String jsonResult = "";
+        try {
+            String urlName = "http://115.159.0.12:8080/like?word=" + curWordOrPhrase.replace(' ', '+') + "&source=" + websiteTitle[index];
+            if (isLike[index])//取消赞
+                urlName += "&dislike=true";
+            url = new URL(urlName);
+            input = new Scanner(url.openStream());
+            while (input.hasNextLine()) {
+                jsonResult += input.nextLine();
+            }
+            System.out.println(jsonResult);
+        } catch (MalformedURLException ex) {
+            System.out.println("无法打开URL");
+        } catch (IOException ex) {
+            System.out.println("无法打开URL");
+        } finally {
+            input.close();
+        }
+        System.out.println(jsonResult);
+        JSONObject all=new JSONObject(jsonResult);
+        String status=all.getString("status");
+        if(status.equals("success"))
+            return true;
+        else
+            return false;
+    }
+
+    /*
+    *   向指定的URL发送POST方法的请求
+    *
+    *   @param url:发送请求的url
+    *   @param param 请求参数，以name1=value&name2=value的形式
+    *   @return 所代表的远程资源的响应结果
+    *
+     */
+    public static String sendPost(String url,String param) {
+        PrintWriter out=null;
+        //BufferedReader in=null;
+        Scanner in=null;
+        String result="";
+        try{
+            URL realUrl=new URL(url);
+            //打开和URL之间的连接
+            URLConnection conn=realUrl.openConnection();
+            //设置通用的请求属性
+            conn.setRequestProperty("accept","*/*");
+            conn.setRequestProperty("connection","Keep-Alive");
+            conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            //发送post请求必须设置如下两行
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            //获取URLConnection对象对应的输出流
+            out=new PrintWriter(conn.getOutputStream());
+            //发送请求参数
+            out.print(param);
+            //flush输出流的缓冲
+            out.flush();
+
+            in=new Scanner(conn.getInputStream());
+            String line;
+            while(in.hasNextLine()) {
+                line=in.nextLine();
+                result+=line;
+            }
+        }catch(MalformedURLException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        catch(IOException ex)
+        {
+            System.out.print("无法打开URL");
+        }
+        finally {
+            in.close();
+            out.close();
+        }
+        return result;
     }
 }
