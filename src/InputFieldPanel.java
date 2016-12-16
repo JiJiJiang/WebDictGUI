@@ -23,8 +23,7 @@ public class InputFieldPanel extends JPanel{
 
     private ContentPanel contentPanel;//use it to display the result
     //constructor
-    public InputFieldPanel(ContentPanel contentPanel)
-    {
+    public InputFieldPanel(ContentPanel contentPanel) {
         this.contentPanel=contentPanel;
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(super.getPreferredSize().width,34));
@@ -100,10 +99,13 @@ public class InputFieldPanel extends JPanel{
                 String input = textInput.getText().trim();//delete the space at both ends
                 if (!input.isEmpty())
                 {
-                    //get all associational words from the server
-                    getAssocitionalWords(input);
-                    for(int i=0;i<realRowCount;i++) {
-                        model.addElement(associationalWords[i]);
+                    int pos=checkString(input);
+                    if(pos==-1) {
+                        //get all associational words from the server
+                        getAssocitionalWords(input);
+                        for (int i = 0; i < realRowCount; i++) {
+                            model.addElement(associationalWords[i]);
+                        }
                     }
                 }
                 boolean isACompleteWord=(realRowCount!=0&&associationalWords[0].equals(input));
@@ -142,7 +144,14 @@ public class InputFieldPanel extends JPanel{
                         else
                             word=textInput.getText();
                         //textPane
-                        if(word.length()!=0) contentPanel.displayWordExplanations(word);
+                        if(word.length()!=0)
+                        {
+                            int pos=checkString(word);
+                            if(pos==-1)
+                                contentPanel.displayWordExplanations(word);
+                            else//含有中文
+                                JOptionPane.showMessageDialog(null, "第"+pos+"个字符为中文字符！", "错误",JOptionPane.ERROR_MESSAGE);
+                        }
 
                         cbInput.setPopupVisible(false);//将下拉框置为不可见
                     }
@@ -184,7 +193,15 @@ public class InputFieldPanel extends JPanel{
                     else
                         word=textInput.getText();
                     //textPane
-                    if(word.length()!=0) contentPanel.displayWordExplanations(word);
+                    if(word.length()!=0)
+                    {
+                        int pos=checkString(word);
+                        if(pos==-1)
+                            contentPanel.displayWordExplanations(word);
+                        else//含有中文
+                            JOptionPane.showMessageDialog(null, "第"+pos+"个字符为中文字符！", "错误",JOptionPane.ERROR_MESSAGE);
+
+                    }
                     cbInput.setPopupVisible(false);
                 }
             }
@@ -193,28 +210,43 @@ public class InputFieldPanel extends JPanel{
 
 
     /*judge whether cbInput is being used.*/
-    private static boolean isAdjusting(JComboBox<String> cbInput)
-    {
+    private static boolean isAdjusting(JComboBox<String> cbInput) {
         if (cbInput.getClientProperty("is_adjusting") instanceof Boolean)
             return (Boolean) cbInput.getClientProperty("is_adjusting");
         return false;
     }
     /*set the cbInput changeable.*/
-    private static void setAdjusting(JComboBox<String> cbInput, boolean adjusting)
-    {
+    private static void setAdjusting(JComboBox<String> cbInput, boolean adjusting) {
         cbInput.putClientProperty("is_adjusting", adjusting);
     }
 
-    protected void paintComponent(Graphics g)
-    {
+    //判断输入是否有中文
+    public static boolean checkChar(char ch) {
+        if ((ch + "").getBytes().length == 1) {
+            return true;//英文
+        } else {
+            return false;//中文
+        }
+    }
+    public static int checkString(String str) {
+        if (str != null) {
+            for (int i = 0; i < str.length(); i++) {
+                //只要字符串中有中文则为中文
+                if (!checkChar(str.charAt(i)))
+                    return i+1;
+            }
+        }
+        return -1;
+    }
+
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         //System.out.println(getWidth());
         textInput.setSize(new Dimension(getWidth()-100-6*2,textInput.getHeight()));
     }
 
     /*use the local dictionary file*/
-    void getAssocitionalWords(String input)
-    {
+    void getAssocitionalWords(String input) {
         //折半查找找到可能符合条件的第一个单词（短语）的下标
         int begin=ReadDictionary.binarySearch(input);
         ArrayList<String> wordOrPhraseArray=ReadDictionary.getDictionary();

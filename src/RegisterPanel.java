@@ -77,6 +77,10 @@ public class RegisterPanel extends JPanel{
             }
         }
     }
+    public boolean sendRegister()
+    {
+        return true;
+    }
     private class CancelListener implements  ActionListener
     {
         public void actionPerformed(ActionEvent e) {
