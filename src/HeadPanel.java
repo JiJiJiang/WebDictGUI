@@ -6,15 +6,21 @@ import java.awt.*;
  */
 public class HeadPanel extends JPanel{
     //constructor
+    TitlePanel titlePanel=null;
+    InputFieldPanel inputFieldPanel=null;
+    JCheckBoxsPanel jCheckBoxsPanel=null;
     public HeadPanel(ContentPanel contentPanel)
     {
         //setLayout(new GridLayout(3,1,0,0));
         setLayout(new BorderLayout(0,0));
         //title panel(WebDictLabel,Login,share)
-        add(new TitlePanel(),BorderLayout.NORTH);
+        titlePanel=new TitlePanel(contentPanel);
+        add(titlePanel,BorderLayout.NORTH);
         //inputField panel(textField(hidden combo box),searchButton)
-        add(new InputFieldPanel(contentPanel),BorderLayout.CENTER);
+        inputFieldPanel=new InputFieldPanel(contentPanel);
+        add(inputFieldPanel,BorderLayout.CENTER);
         //JCheckBoxs panel(jchkBaiDu,jchkYouDao,jchkJinSan)
-        add(new JCheckBoxsPanel(contentPanel),BorderLayout.SOUTH);
+        jCheckBoxsPanel=new JCheckBoxsPanel(contentPanel);
+        add(jCheckBoxsPanel,BorderLayout.SOUTH);
     }
 }

@@ -11,8 +11,9 @@ import java.awt.event.ActionListener;
 public class LoginPanel extends JPanel{
     JFrame outFrame=null;
     int[] statusChange=null;
+    String[] userName=null;
 
-    JTextField userName=null;
+    JTextField userNameTextField=null;
     JPasswordField password=null;
 
     public LoginPanel()
@@ -21,8 +22,8 @@ public class LoginPanel extends JPanel{
         JPanel upPanel=new JPanel();
         upPanel.setLayout(new GridLayout(2,2,5,5));
         upPanel.add(new JLabel("用户名:"));
-        userName=new JTextField(20);
-        upPanel.add(userName);
+        userNameTextField=new JTextField(20);
+        upPanel.add(userNameTextField);
         upPanel.add(new JLabel("密码："));
         password=new JPasswordField(20);
         upPanel.add(password);
@@ -49,12 +50,15 @@ public class LoginPanel extends JPanel{
     {
         this.statusChange=statusChange;
     }
+    public void setUserName(String[] userName){
+        this.userName=userName;
+    }
 
     /*two listeners*/
     private class ConfrimListener implements ActionListener
     {
         public void actionPerformed(ActionEvent e) {
-            String userNameString=new String(userName.getText().trim());
+            String userNameString=new String(userNameTextField.getText().trim());
             String passwordString=new String(password.getPassword());
             if(userNameString.length()==0||passwordString.length()==0)
                 JOptionPane.showMessageDialog(null, "输入栏不能为空！！", "错误",JOptionPane.ERROR_MESSAGE);
@@ -67,13 +71,15 @@ public class LoginPanel extends JPanel{
                 if(true)
                 {
                     //清空输入框
-                    userName.setText("");
+                    userNameTextField.setText("");
                     password.setText("");
                     outFrame.setVisible(false);
                     synchronized (statusChange) {
                         statusChange[0] = 1;
+                        userName[0]=userNameString;
                     }
                     //更新在线和离线用户列表
+
                     JOptionPane.showMessageDialog(null, "登录成功！", "提示",JOptionPane.PLAIN_MESSAGE);
                 }
                 else

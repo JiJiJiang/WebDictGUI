@@ -29,6 +29,7 @@ public class WebDictGUIRunner extends JFrame{
 
         /*head panel*/
         HeadPanel headPanel=new HeadPanel(contentPanel);
+        contentPanel.setHeadPanel(headPanel);
         add(headPanel,BorderLayout.NORTH);
     }
 

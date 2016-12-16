@@ -12,6 +12,13 @@ import org.json.*;
  * Created by 77 on 2016/11/26.
  */
 public class ContentPanel extends JPanel{
+    /*HeadPanel*/
+    HeadPanel headPanel;
+    public void setHeadPanel(HeadPanel headPanel)
+    {
+        this.headPanel=headPanel;
+    }
+
     /*colors*/
     private final Color myColor=new Color(39,154,235);//天蓝色
     private final Color textPaneColor=new Color(242, 242, 242);//textPane背景色
@@ -62,6 +69,10 @@ public class ContentPanel extends JPanel{
 
     /*from the server*/
     String curWordOrPhrase=null;
+    public String getCurWordOrPhrase()
+    {
+        return curWordOrPhrase;
+    }
     String[] explanations= new String[3];//单词解释
     int[] likes=new int[3];//点赞次数
     int[] displayOrder=new int[3];//打印顺序
@@ -71,13 +82,36 @@ public class ContentPanel extends JPanel{
     String spaceContent;
     String[] websiteTitle={"百度","有道","金山"};
     boolean[] selectedItem={true,true,true};//store items chosen by the user.
-    public void setSelectedItem(int index,boolean isSelected)
+    public boolean[] getSelectedItem()
     {
+        return selectedItem;
+    }
+    public void setSelectedItem(boolean[] selectedItem) {
+        for(int i=0;i<3;i++)
+            this.selectedItem[i]=selectedItem[i];
+        headPanel.jCheckBoxsPanel.setSelectedItem(this.selectedItem);
+    }
+    public void setSelectedItem(int index,boolean isSelected) {
         selectedItem[index]=isSelected;
         if(curWordOrPhrase!=null) {
             renewResetCaretPositions();
             displayWordExplanations(curWordOrPhrase);
         }
+    }
+
+    //待显示的单词
+    ArrayList<String> allWords=new ArrayList<String>();
+    public void addWordOrPhrase(String wordOrPhrase)
+    {
+        allWords.add(wordOrPhrase);
+        int messageNum=allWords.size();
+        headPanel.titlePanel.message.setText("消息 "+messageNum);
+        headPanel.titlePanel.message.setForeground(Color.RED);
+    }
+    ArrayList<boolean[]> allSelectedItems=new ArrayList<boolean[]>();
+    public void addSelectedItem(boolean[] selectedItem)
+    {
+        allSelectedItems.add(selectedItem);
     }
 
     //constructor
@@ -100,7 +134,6 @@ public class ContentPanel extends JPanel{
                 panel_contentLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addComponent(textPane)
         );
-
     }
 
     protected void paintComponent(Graphics g)
@@ -137,7 +170,7 @@ public class ContentPanel extends JPanel{
             renewResetCaretPositions();
         }
         textPane.setText("");//clear textPane
-        //textPane.removeAll();
+        textPane.removeAll();
 
         //baidu,youdao and jinshan.
         for(int i=0;i<3;i++) {
@@ -173,11 +206,13 @@ public class ContentPanel extends JPanel{
         /*like button*/
         JButton likeButton;
         if (isLike[index]) {
-            likeButton = new JButton(likes[index]+1+"",likeImageIcon);
+            likeButton = new JButton(likeImageIcon);
+            //likes[index]+1+"",
             likeButton.setPreferredSize(new Dimension(10, 22));
             likeButton.setToolTipText("取消");
         } else {
-            likeButton = new JButton(likes[index]+"",dislikeImageIcon);
+            likeButton = new JButton(dislikeImageIcon);
+            //likes[index]+"",
             likeButton.setPreferredSize(new Dimension(10, 22));
             likeButton.setToolTipText("点赞");
         }

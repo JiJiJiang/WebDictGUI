@@ -9,9 +9,14 @@ import java.awt.event.ActionListener;
 public class TitlePanel extends JPanel{
     private JFrame userFrame=new JFrame();//登录的frame
     private UserPanel userPanel=new UserPanel();//登录的panel
+
+    JButton message=null;//消息盒子
+
+    private ContentPanel contentPanel;//use it to display the result
     //constructor
-    public TitlePanel()
+    public TitlePanel(ContentPanel contentPanel)
     {
+        this.contentPanel=contentPanel;
         setLayout(new BorderLayout());
         final Color myColor=new Color(31,162,242);//天蓝色
 
@@ -21,35 +26,38 @@ public class TitlePanel extends JPanel{
         webDictLabel.setPreferredSize(new Dimension(25,25));
         ToolTipManager.sharedInstance().setDismissDelay(10000);
         webDictLabel.setToolTipText("欢迎使用在线词典！");
-        /*Login*/
-        ImageIcon loginIcon=new ImageIcon("image/login.jpg");
-        JButton login=new JButton(loginIcon);
-        ImageIcon loginRolloverIcon=new ImageIcon("image/loginRollover.jpg");
-        login.setRolloverIcon(loginRolloverIcon);
-        login.setContentAreaFilled(false);
-        login.setBorderPainted(false);
-        login.setPreferredSize(new Dimension(25,25));
-        login.setFocusPainted(false);
-        login.setToolTipText("用户窗口");
+        /*User*/
+        ImageIcon userIcon=new ImageIcon("image/login.jpg");
+        JButton user=new JButton(userIcon);
+        ImageIcon userRolloverIcon=new ImageIcon("image/loginRollover.jpg");
+        user.setRolloverIcon(userRolloverIcon);
+        user.setContentAreaFilled(false);
+        user.setBorderPainted(false);
+        user.setPreferredSize(new Dimension(25,25));
+        user.setFocusPainted(false);
+        user.setToolTipText("用户窗口");
         /*create a left panel to put webDictLabel and loginButton*/
         JPanel leftPanel=new JPanel(new FlowLayout(FlowLayout.RIGHT,0,0));
         leftPanel.setBackground(myColor);
         leftPanel.add(webDictLabel);
-        leftPanel.add(login);
+        leftPanel.add(user);
         add(leftPanel,BorderLayout.WEST);
 
-        /*share*/
-        ImageIcon shareIcon=new ImageIcon("image/shareButton.jpg");
-        JButton share=new JButton(shareIcon);
-        share.setContentAreaFilled(false);
-        share.setBorderPainted(false);
-        share.setPreferredSize(new Dimension(25,25));
-        share.setFocusPainted(false);
-        share.setToolTipText("分享单词卡！");
+        /*message*/
+        ///*
+        //ImageIcon messageIcon=new ImageIcon("image/shareButton.jpg");
+        message=new JButton("消息 0");
+        message.setVisible(false);
+        message.setContentAreaFilled(false);
+        message.setBorderPainted(false);
+        message.setPreferredSize(new Dimension(100,25));
+        message.setFocusPainted(false);
+        message.setToolTipText("分享单词卡！");
+        //*/
         /*create a right panel to put shareButton*/
         JPanel rightPanel=new JPanel(new FlowLayout(FlowLayout.RIGHT,0,0));
         rightPanel.setBackground(myColor);
-        rightPanel.add(share);
+        rightPanel.add(message);
         add(rightPanel,BorderLayout.CENTER);
 
         //初始化用户的frame
@@ -60,17 +68,38 @@ public class TitlePanel extends JPanel{
         userFrame.setVisible(false);
         userFrame.setResizable(false);
         userFrame.add(userPanel);
+        userPanel.setContentPanel(contentPanel);
 
         /*add all listeners here.*/
-        /*login*/
-        login.addActionListener(new UserListener());
-        /*share*/
+        /*user*/
+        user.addActionListener(new UserListener());
+        /*message*/
+        message.addActionListener(new MessageCheck());
     }
     private class UserListener implements ActionListener
     {
         public void actionPerformed(ActionEvent e) {
             //System.out.println("Handle Login!");
             userFrame.setVisible(true);
+        }
+    }
+    private class MessageCheck implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e) {
+            if(contentPanel.allWords.size()>0) {
+                String word=contentPanel.allWords.get(0);
+                contentPanel.allWords.remove(0);
+                boolean[] selectedItem=contentPanel.allSelectedItems.get(0);
+                contentPanel.allSelectedItems.remove(0);
+
+                int messageNum=contentPanel.allWords.size();
+                if(messageNum==0)
+                    message.setForeground(Color.black);
+                message.setText("消息 "+messageNum);
+
+                contentPanel.setSelectedItem(selectedItem);
+                contentPanel.displayWordExplanations(word);
+            }
         }
     }
 }

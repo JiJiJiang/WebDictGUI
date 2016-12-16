@@ -10,6 +10,16 @@ public class JCheckBoxsPanel extends JPanel{
     private final Font font=new Font("Serif",Font.BOLD,15);//字体
     private ContentPanel contentPanel;//use it to display the result
 
+    JCheckBox baidu=null;
+    JCheckBox youdao=null;
+    JCheckBox jinshan=null;
+    void setSelectedItem(boolean[] selectedItem)
+    {
+        baidu.setSelected(selectedItem[0]);
+        youdao.setSelected(selectedItem[1]);
+        jinshan.setSelected(selectedItem[2]);
+
+    }
     //private FlowLayout flowLayout=new FlowLayout(FlowLayout.LEFT,70,1);
     //constructor
     public JCheckBoxsPanel(ContentPanel contentPanel)
@@ -20,7 +30,7 @@ public class JCheckBoxsPanel extends JPanel{
         //setBackground(Color.WHITE);
 
         /*set up three JCheckBox*/
-        JCheckBox baidu=new JCheckBox("百度",true);
+        baidu=new JCheckBox("百度",true);
         baidu.setFont(font);
         //baidu.setBackground(Color.WHITE);
         baidu.setFocusPainted(false);
@@ -28,7 +38,7 @@ public class JCheckBoxsPanel extends JPanel{
         baiduPanel.add(baidu);
         add(baiduPanel);
 
-        JCheckBox youdao=new JCheckBox("有道",true);
+        youdao=new JCheckBox("有道",true);
         youdao.setFont(font);
         //youdao.setBackground(Color.WHITE);
         youdao.setFocusPainted(false);
@@ -36,7 +46,7 @@ public class JCheckBoxsPanel extends JPanel{
         youdaoPanel.add(youdao);
         add(youdaoPanel);
 
-        JCheckBox jinshan=new JCheckBox("金山",true);
+        jinshan=new JCheckBox("金山",true);
         jinshan.setFont(font);
         //jinshan.setBackground(Color.WHITE);
         jinshan.setFocusPainted(false);
