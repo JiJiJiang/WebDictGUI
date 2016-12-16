@@ -222,9 +222,14 @@ public class ContentPanel extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(isLike[index])
+                {
                     System.out.println("取消点赞");
-                else
+                }
+                else {
                     System.out.println("点赞");
+                }
+                //向服务器发送点赞和取消赞的请求
+
                 isLike[index]=!isLike[index];
                 resetCaretPosition=resetLikeCaretPositions[index];
                 displayWordExplanations(curWordOrPhrase);
