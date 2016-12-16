@@ -83,7 +83,7 @@ public class ContentPanel extends JPanel{
     /*websites*/
     String line;
     String spaceContent;
-    String[] websiteTitle={"百度","有道","金山"};
+    String[] websiteTitle={"海词","有道","金山"};
     boolean[] selectedItem={true,true,true};//store items chosen by the user.
     public boolean[] getSelectedItem()
     {
@@ -125,7 +125,7 @@ public class ContentPanel extends JPanel{
         //textPane.setBorder(new LineBorder(myColor,1));
 		/*add textPane*/
 
-        /*copy from baidu,it realizes autoLineWrap of textPane*/
+        /*copy from haici,it realizes autoLineWrap of textPane*/
         GroupLayout panel_contentLayout = new GroupLayout(this);
         setLayout(panel_contentLayout);
         panel_contentLayout.setAutoCreateContainerGaps(true);
@@ -175,7 +175,7 @@ public class ContentPanel extends JPanel{
         textPane.setText("");//clear textPane
         textPane.removeAll();
 
-        //baidu,youdao and jinshan.
+        //haici,youdao and jinshan.
         for(int i=0;i<3;i++) {
             if (selectedItem[displayOrder[i]]) {
                 try {
@@ -297,7 +297,7 @@ public class ContentPanel extends JPanel{
         Scanner input=null;
         String jsonResult="";
         try{
-            url=new URL("http://115.159.0.12:8080/q?word="+wordOrPhrase.replace(' ','+')+"&baidu=true&youdao=true&jinshan=true");
+            url=new URL("http://115.159.0.12:8080/q?word="+wordOrPhrase.replace(' ','+')+"&haici=true&youdao=true&jinshan=true");
             input=new Scanner(url.openStream());
             while(input.hasNextLine()) {
                 jsonResult+=input.nextLine();
@@ -327,7 +327,7 @@ public class ContentPanel extends JPanel{
                 {
                     String source=jsonObject.getString("source");
                     int index;
-                    if(source.equals("baidu"))
+                    if(source.equals("haici"))
                         index=0;
                     else if(source.equals("youdao"))
                         index=1;
@@ -342,7 +342,7 @@ public class ContentPanel extends JPanel{
             }
         }
     }
-    //get the display order of "baidu,youdao and jinshan" according to their popularity
+    //get the display order of "haici,youdao and jinshan" according to their popularity
     private void getDisplayOrder(String wordOrPhrase)
     {
         boolean[] isUesd={false,false,false};

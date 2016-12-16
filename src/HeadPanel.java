@@ -19,7 +19,7 @@ public class HeadPanel extends JPanel{
         //inputField panel(textField(hidden combo box),searchButton)
         inputFieldPanel=new InputFieldPanel(contentPanel);
         add(inputFieldPanel,BorderLayout.CENTER);
-        //JCheckBoxs panel(jchkBaiDu,jchkYouDao,jchkJinSan)
+        //JCheckBoxs panel(jchkHaiCi,jchkYouDao,jchkJinSan)
         jCheckBoxsPanel=new JCheckBoxsPanel(contentPanel);
         add(jCheckBoxsPanel,BorderLayout.SOUTH);
     }
