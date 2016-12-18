@@ -84,6 +84,7 @@ public class ContentPanel extends JPanel{
     String line;
     String spaceContent;
     String[] websiteTitle={"海词","有道","金山"};
+    String[] source={"haici","youdao","jinshan"};
     boolean[] selectedItem={true,true,true};//store items chosen by the user.
     public boolean[] getSelectedItem()
     {
@@ -366,7 +367,8 @@ public class ContentPanel extends JPanel{
 
     //向服务器发送点赞或者取消赞的请求
     boolean sendLikeORDislike(int index) {
-         URL url = null;
+       /*
+        URL url = null;
         Scanner input = null;
         String jsonResult = "";
         try {
@@ -386,6 +388,12 @@ public class ContentPanel extends JPanel{
         } finally {
             input.close();
         }
+        */
+        String url = "http://115.159.0.12:8080/word/like";
+        String param="word=" + curWordOrPhrase.replace(' ', '+') + "&source=" + source[index];
+        if (isLike[index])//取消赞
+            param += "&dislike=true";
+        String jsonResult=sendPost(url,param);
         System.out.println(jsonResult);
         JSONObject all=new JSONObject(jsonResult);
         String status=all.getString("status");
@@ -405,8 +413,8 @@ public class ContentPanel extends JPanel{
      */
     public static String sendPost(String url,String param) {
         PrintWriter out=null;
-        //BufferedReader in=null;
-        Scanner in=null;
+        BufferedReader in=null;
+        //Scanner in=null;
         String result="";
         try{
             URL realUrl=new URL(url);
@@ -426,10 +434,9 @@ public class ContentPanel extends JPanel{
             //flush输出流的缓冲
             out.flush();
 
-            in=new Scanner(conn.getInputStream());
+            in=new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;
-            while(in.hasNextLine()) {
-                line=in.nextLine();
+            while((line=in.readLine())!=null) {
                 result+=line;
             }
         }catch(MalformedURLException ex)
@@ -441,7 +448,6 @@ public class ContentPanel extends JPanel{
             System.out.print("无法打开URL");
         }
         finally {
-            in.close();
             out.close();
         }
         return result;

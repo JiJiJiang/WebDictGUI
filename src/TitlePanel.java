@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
  */
 public class TitlePanel extends JPanel{
     private JFrame userFrame=new JFrame();//登录的frame
-    private UserPanel userPanel=new UserPanel();//登录的panel
+    UserPanel userPanel=new UserPanel();//登录的panel
 
     JButton message=null;//消息盒子
 

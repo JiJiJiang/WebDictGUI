@@ -9,7 +9,9 @@ import java.awt.event.ActionListener;
 public class RegisterPanel extends JPanel{
     JFrame outFrame=null;
     JTextField userName=null;
+    String userNameString=null;
     JPasswordField password=null;
+    String passwordString=null;
     JPasswordField passwordConfirm=null;
 
     public RegisterPanel()
@@ -47,8 +49,9 @@ public class RegisterPanel extends JPanel{
     private class ConfrimListener implements ActionListener
     {
         public void actionPerformed(ActionEvent e) {
-            String userNameString=new String(userName.getText().trim());
-            String passwordString=new String(password.getPassword());
+            userNameString=new String(userName.getText().trim());
+            passwordString=new String(password.getPassword());
+            //System.out.println(userNameString);
             //System.out.println(passwordString);
             String passwordConfirmString=new String(passwordConfirm.getPassword());
             //System.out.println(passwordConfirmString);
@@ -59,9 +62,9 @@ public class RegisterPanel extends JPanel{
             else
             {
                 //建立url，发送注册请求给服务器
-
+                boolean isRegisterSuccess=sendRegister();
                 //得到返回结果
-                if(true)
+                if(isRegisterSuccess)
                 {
                     //清空输入框
                     userName.setText("");
@@ -72,14 +75,20 @@ public class RegisterPanel extends JPanel{
                 }
                 else
                 {
-                    JOptionPane.showMessageDialog(null, "注册失败，请重新注册！", "提示",JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "用户名已存在！注册失败，请重新注册！", "错误",JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
     }
     public boolean sendRegister()
     {
-        return true;
+        String url="http://115.159.0.12:8080/user/signup";
+        String param="user="+userNameString+"&pwd="+passwordString;
+        System.out.println(param);
+        String jsonResult=ContentPanel.sendPost(url,param);
+        System.out.println(jsonResult);
+        //分析jsonResult
+        return false;
     }
     private class CancelListener implements  ActionListener
     {

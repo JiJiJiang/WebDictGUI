@@ -2,6 +2,8 @@
  * Created by 77 on 2016/12/15.
  */
 
+import org.json.JSONObject;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -219,10 +221,18 @@ public class UserPanel extends JPanel{
                     boolean[] selectedItem=contentPanel.getSelectedItem();//分享的网站
                     if(curWordOrPhrase!=null)//要发送的单词非空
                     {
-                        JOptionPane.showMessageDialog(null, "向用户\""+targetUserName+"\"分享单词\""+curWordOrPhrase+"\"!!", "提示",JOptionPane.PLAIN_MESSAGE);
                         //向服务器发送单词卡
                         //senderUserName,targetUserName,word,{true,true,true}
-
+                        String fromUser=senderUserName;
+                        String toUser=targetUserName;
+                        String word=curWordOrPhrase;
+                        String url="http://115.159.0.12:8080/card/send";
+                        String param="fromUser="+fromUser+"&toUser="+toUser+"&word"+word+"&youdao="+selectedItem[1]+"&jinshan="+selectedItem[2]+"&haici="+selectedItem[0];
+                        String jsonResult=contentPanel.sendPost(url,param);
+                        JSONObject all=new JSONObject(jsonResult);
+                        String status=all.getString("status");
+                        if(status.equals("success"))//发送成功
+                            JOptionPane.showMessageDialog(null, "成功向用户\""+targetUserName+"\"分享单词\""+curWordOrPhrase+"\"!!", "提示",JOptionPane.PLAIN_MESSAGE);
                     }
                     else
                     {
@@ -313,7 +323,7 @@ public class UserPanel extends JPanel{
                 if (status)//用户已经登录
                 {
                     //向服务器发送消息请求
-                    boolean receiveMessage=false;
+                    boolean receiveMessage=true;
                     if(receiveMessage)//没有消息
                     {
 

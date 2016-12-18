@@ -7,11 +7,14 @@
  */
 
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 public class WebDictGUIRunner extends JFrame{
 	private final static int FRAME_WIDTH=580;
 	private final static int FRAME_HEIGHT=440;
+    HeadPanel headPanel;
 
     //constructor
     public WebDictGUIRunner()
@@ -28,7 +31,7 @@ public class WebDictGUIRunner extends JFrame{
         //add(contentPanel,BorderLayout.CENTER);
 
         /*head panel*/
-        HeadPanel headPanel=new HeadPanel(contentPanel);
+        headPanel=new HeadPanel(contentPanel);
         contentPanel.setHeadPanel(headPanel);
         add(headPanel,BorderLayout.NORTH);
     }
@@ -47,5 +50,14 @@ public class WebDictGUIRunner extends JFrame{
 
         //initial the dictionary
         ReadDictionary.initialDictionary();
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                //System.out.println("Window closes");
+                //发送注销请求
+                //frame.headPanel.titlePanel.userPanel.
+            }
+        });
     }
 }

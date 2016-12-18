@@ -2,10 +2,16 @@
  * Created by 77 on 2016/12/15.
  */
 
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Scanner;
 
 
 public class LoginPanel extends JPanel{
@@ -65,10 +71,14 @@ public class LoginPanel extends JPanel{
             else
             {
                 //建立url，发送登录请求给服务器
-
-                //得到返回结果
-
-                if(true)
+                String url= "http://115.159.0.12:8080/user/login";
+                String param="user="+userNameString+"&pwd="+passwordString;
+                String jsonResult=ContentPanel.sendPost(url,param);
+                System.out.println(jsonResult);
+                //解析jsonResult
+                JSONObject all=new JSONObject(jsonResult);
+                String status=all.getString("status");
+                if(status.equals("success"))
                 {
                     //清空输入框
                     userNameTextField.setText("");
@@ -84,17 +94,45 @@ public class LoginPanel extends JPanel{
                 }
                 else
                 {
-                    String failReason="";
-                    if(failReason.equals("name"))//用户名不存在
+                    String failReason=all.getString("msg");
+                    if(failReason.equals("user not found"))//用户名不存在
                         JOptionPane.showMessageDialog(null, "用户名不存在，请重新登录！", "错误",JOptionPane.ERROR_MESSAGE);
                     else if(failReason.equals("password"))//密码错误
                         JOptionPane.showMessageDialog(null, "密码错误，请重新登录！", "错误",JOptionPane.ERROR_MESSAGE);
-                    else
-                        JOptionPane.showMessageDialog(null, "该用户已经登录！！", "错误",JOptionPane.ERROR_MESSAGE);
+                    //else
+                        //JOptionPane.showMessageDialog(null, "该用户已经登录！！", "错误",JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
     }
+    public String[] getUserList()
+    {
+        URL url=null;
+        Scanner input=null;
+        String jsonResult="";
+        try{
+            url=new URL("http://115.159.0.12:8080/user/list");
+            input=new Scanner(url.openStream());
+            while(input.hasNextLine()) {
+                jsonResult+=input.nextLine();
+            }
+            System.out.println(jsonResult);
+        }
+        catch(MalformedURLException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        catch(IOException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        finally{
+            input.close();
+        }
+
+        return null;
+    }
+
     private class CancelListener implements  ActionListener
     {
         public void actionPerformed(ActionEvent e) {
