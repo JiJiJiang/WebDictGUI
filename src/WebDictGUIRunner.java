@@ -53,10 +53,11 @@ public class WebDictGUIRunner extends JFrame{
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                //发送注销请求
+                if(frame.headPanel.titlePanel.userPanel.status==true)
+                    frame.headPanel.titlePanel.userPanel.sendLogout();
                 super.windowClosing(e);
                 //System.out.println("Window closes");
-                //发送注销请求
-                //frame.headPanel.titlePanel.userPanel.
             }
         });
     }

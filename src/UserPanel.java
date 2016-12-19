@@ -17,6 +17,7 @@ public class UserPanel extends JPanel{
     boolean status=false;//未登录
     int[] statusChange=new int[1];//用户登录状态变化
     String[] userName=new String[1];//用户名
+    String[] password=new String[1];//密码
     JLabel statusLabel=null;//用户登录状态指示的label
     private ImageIcon onlineIcon=new ImageIcon("image/online.jpg");
     private ImageIcon offlineIcon=new ImageIcon("image/offline.jpg");
@@ -122,7 +123,7 @@ public class UserPanel extends JPanel{
         loginPanel.setStatusChange(statusChange);
         loginPanel.setUserName(userName);
         loginPanel.setFrame(loginFrame);
-
+        loginPanel.setPassword(password);
 
         //判断用户登录状态是否发生变化
         Thread userStatusListener=new Thread(new UserStatusListener());
@@ -173,12 +174,7 @@ public class UserPanel extends JPanel{
                 JOptionPane.showMessageDialog(null, "未登录！", "提示",JOptionPane.PLAIN_MESSAGE);
             else {
                 //向服务器发送注销的请求
-
-
-                synchronized (statusChange) {
-                    statusChange[0] = 1;
-                }
-                JOptionPane.showMessageDialog(null, "注销成功！", "提示",JOptionPane.PLAIN_MESSAGE);
+                sendLogout();
             }
         }
     }
@@ -191,6 +187,7 @@ public class UserPanel extends JPanel{
             //onlineUserList.setListData(new String[]{});
             //offlineUserList.setListData(new String[]{});
             //向服务器发送请求获得在线和离线用户列表
+
             onlineUserList.setListData(new String[]{"as","b","c","d","as","b","c","d","as","b","c","d","as","b","c","d"});
             offlineUserList.setListData(new String[]{"as","b","c","d","as","b","c","d","as","b","c","d","as","b","c","d"});
         }
@@ -274,6 +271,25 @@ public class UserPanel extends JPanel{
                 }
             }
         }
+    }
+
+    public void sendLogout()
+    {
+            String url="http://115.159.0.12:8080/user/logout";
+            String param="username="+userName[0]+"&pwd="+password[0];
+            String jsonResult=contentPanel.sendPost(url,param);
+            System.out.println(jsonResult);
+            JSONObject all=new JSONObject(jsonResult);
+            String status=all.getString("status");
+            if(status.equals("success"))
+            {
+                synchronized (statusChange) {
+                    statusChange[0] = 1;
+                }
+                JOptionPane.showMessageDialog(null, "注销成功！", "提示",JOptionPane.PLAIN_MESSAGE);
+            }
+            else
+                JOptionPane.showMessageDialog(null, "注销失败！", "错误",JOptionPane.ERROR_MESSAGE);
     }
 
 

@@ -1,6 +1,8 @@
 /**
  * Created by 77 on 2016/12/15.
  */
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -83,12 +85,14 @@ public class RegisterPanel extends JPanel{
     public boolean sendRegister()
     {
         String url="http://115.159.0.12:8080/user/signup";
-        String param="user="+userNameString+"&pwd="+passwordString;
-        System.out.println(param);
+        String param="username="+userNameString+"&pwd="+passwordString;
+        //System.out.println(param);
         String jsonResult=ContentPanel.sendPost(url,param);
         System.out.println(jsonResult);
+        JSONObject all=new JSONObject(jsonResult);
+        String status=all.getString("status");
         //分析jsonResult
-        return false;
+        return status.equals("success");
     }
     private class CancelListener implements  ActionListener
     {

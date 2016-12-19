@@ -18,9 +18,10 @@ public class LoginPanel extends JPanel{
     JFrame outFrame=null;
     int[] statusChange=null;
     String[] userName=null;
+    String[] password=null;
 
     JTextField userNameTextField=null;
-    JPasswordField password=null;
+    JPasswordField passwordTextField=null;
 
     public LoginPanel()
     {
@@ -31,8 +32,8 @@ public class LoginPanel extends JPanel{
         userNameTextField=new JTextField(20);
         upPanel.add(userNameTextField);
         upPanel.add(new JLabel("密码："));
-        password=new JPasswordField(20);
-        upPanel.add(password);
+        passwordTextField=new JPasswordField(20);
+        upPanel.add(passwordTextField);
         add(upPanel,BorderLayout.CENTER);
 
         //downPanel
@@ -59,20 +60,23 @@ public class LoginPanel extends JPanel{
     public void setUserName(String[] userName){
         this.userName=userName;
     }
+    public void setPassword(String[] password){
+        this.password=password;
+    }
 
     /*two listeners*/
     private class ConfrimListener implements ActionListener
     {
         public void actionPerformed(ActionEvent e) {
             String userNameString=new String(userNameTextField.getText().trim());
-            String passwordString=new String(password.getPassword());
+            String passwordString=new String(passwordTextField.getPassword());
             if(userNameString.length()==0||passwordString.length()==0)
                 JOptionPane.showMessageDialog(null, "输入栏不能为空！！", "错误",JOptionPane.ERROR_MESSAGE);
             else
             {
                 //建立url，发送登录请求给服务器
                 String url= "http://115.159.0.12:8080/user/login";
-                String param="user="+userNameString+"&pwd="+passwordString;
+                String param="username="+userNameString+"&pwd="+passwordString;
                 String jsonResult=ContentPanel.sendPost(url,param);
                 System.out.println(jsonResult);
                 //解析jsonResult
@@ -82,11 +86,12 @@ public class LoginPanel extends JPanel{
                 {
                     //清空输入框
                     userNameTextField.setText("");
-                    password.setText("");
+                    passwordTextField.setText("");
                     outFrame.setVisible(false);
                     synchronized (statusChange) {
                         statusChange[0] = 1;
                         userName[0]=userNameString;
+                        password[0]=passwordString;
                     }
                     //更新在线和离线用户列表
 
@@ -97,7 +102,7 @@ public class LoginPanel extends JPanel{
                     String failReason=all.getString("msg");
                     if(failReason.equals("user not found"))//用户名不存在
                         JOptionPane.showMessageDialog(null, "用户名不存在，请重新登录！", "错误",JOptionPane.ERROR_MESSAGE);
-                    else if(failReason.equals("password"))//密码错误
+                    else if(failReason.equals("password incorrect"))//密码错误
                         JOptionPane.showMessageDialog(null, "密码错误，请重新登录！", "错误",JOptionPane.ERROR_MESSAGE);
                     //else
                         //JOptionPane.showMessageDialog(null, "该用户已经登录！！", "错误",JOptionPane.ERROR_MESSAGE);
