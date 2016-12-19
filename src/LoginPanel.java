@@ -8,10 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Scanner;
 
 
 public class LoginPanel extends JPanel{
@@ -22,6 +18,8 @@ public class LoginPanel extends JPanel{
 
     JTextField userNameTextField=null;
     JPasswordField passwordTextField=null;
+
+    UserPanel userPanel=null;
 
     public LoginPanel()
     {
@@ -63,6 +61,9 @@ public class LoginPanel extends JPanel{
     public void setPassword(String[] password){
         this.password=password;
     }
+    public void setUserPanel(UserPanel userPanel){
+        this.userPanel=userPanel;
+    }
 
     /*two listeners*/
     private class ConfrimListener implements ActionListener
@@ -94,7 +95,7 @@ public class LoginPanel extends JPanel{
                         password[0]=passwordString;
                     }
                     //更新在线和离线用户列表
-
+                    userPanel.renewUserList();
                     JOptionPane.showMessageDialog(null, "登录成功！", "提示",JOptionPane.PLAIN_MESSAGE);
                 }
                 else
@@ -109,33 +110,6 @@ public class LoginPanel extends JPanel{
                 }
             }
         }
-    }
-    public String[] getUserList()
-    {
-        URL url=null;
-        Scanner input=null;
-        String jsonResult="";
-        try{
-            url=new URL("http://115.159.0.12:8080/user/list");
-            input=new Scanner(url.openStream());
-            while(input.hasNextLine()) {
-                jsonResult+=input.nextLine();
-            }
-            System.out.println(jsonResult);
-        }
-        catch(MalformedURLException ex)
-        {
-            System.out.println("无法打开URL");
-        }
-        catch(IOException ex)
-        {
-            System.out.println("无法打开URL");
-        }
-        finally{
-            input.close();
-        }
-
-        return null;
     }
 
     private class CancelListener implements  ActionListener

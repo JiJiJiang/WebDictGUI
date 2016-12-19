@@ -11,6 +11,7 @@ public class TitlePanel extends JPanel{
     UserPanel userPanel=new UserPanel();//登录的panel
 
     JButton message=null;//消息盒子
+    JButton user=null;//用户按钮
 
     private ContentPanel contentPanel;//use it to display the result
     //constructor
@@ -28,7 +29,7 @@ public class TitlePanel extends JPanel{
         webDictLabel.setToolTipText("欢迎使用在线词典！");
         /*User*/
         ImageIcon userIcon=new ImageIcon("image/login.jpg");
-        JButton user=new JButton(userIcon);
+        user=new JButton(userIcon);
         ImageIcon userRolloverIcon=new ImageIcon("image/loginRollover.jpg");
         user.setRolloverIcon(userRolloverIcon);
         user.setContentAreaFilled(false);

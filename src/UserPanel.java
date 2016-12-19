@@ -2,6 +2,7 @@
  * Created by 77 on 2016/12/15.
  */
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -10,6 +11,10 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Scanner;
 
 
 public class UserPanel extends JPanel{
@@ -124,6 +129,7 @@ public class UserPanel extends JPanel{
         loginPanel.setUserName(userName);
         loginPanel.setFrame(loginFrame);
         loginPanel.setPassword(password);
+        loginPanel.setUserPanel(this);
 
         //判断用户登录状态是否发生变化
         Thread userStatusListener=new Thread(new UserStatusListener());
@@ -183,13 +189,7 @@ public class UserPanel extends JPanel{
     {
         public void actionPerformed(ActionEvent e)
         {
-            //清空当前列表
-            //onlineUserList.setListData(new String[]{});
-            //offlineUserList.setListData(new String[]{});
-            //向服务器发送请求获得在线和离线用户列表
-
-            onlineUserList.setListData(new String[]{"as","b","c","d","as","b","c","d","as","b","c","d","as","b","c","d"});
-            offlineUserList.setListData(new String[]{"as","b","c","d","as","b","c","d","as","b","c","d","as","b","c","d"});
+            renewUserList();
         }
     }
     /*share listener*/
@@ -198,6 +198,7 @@ public class UserPanel extends JPanel{
         public void actionPerformed(ActionEvent e)
         {
             toShare=true;
+            renewUserList();
             JOptionPane.showMessageDialog(null, "请选择目标用户", "提示",JOptionPane.PLAIN_MESSAGE);
         }
     }
@@ -206,13 +207,13 @@ public class UserPanel extends JPanel{
     {
         public void valueChanged(ListSelectionEvent e)
         {
-            if(toShare) {//用户点击了分享
+            if(toShare&&onlineUserList.getSelectedValue()!=null) {//用户点击了分享
                 if (onlineUserList.getValueIsAdjusting())
                 {
                     String senderUserName=userName[0];
-                    System.out.println(senderUserName);
+                    //System.out.println(senderUserName);
                     String targetUserName=onlineUserList.getSelectedValue();
-                    System.out.println(targetUserName);
+                    //System.out.println(targetUserName);
                     //获得发送的单词及网站
                     String curWordOrPhrase=contentPanel.getCurWordOrPhrase();//单词
                     boolean[] selectedItem=contentPanel.getSelectedItem();//分享的网站
@@ -224,8 +225,10 @@ public class UserPanel extends JPanel{
                         String toUser=targetUserName;
                         String word=curWordOrPhrase;
                         String url="http://115.159.0.12:8080/card/send";
-                        String param="fromUser="+fromUser+"&toUser="+toUser+"&word"+word+"&youdao="+selectedItem[1]+"&jinshan="+selectedItem[2]+"&haici="+selectedItem[0];
+                        String param="fromUser="+fromUser+"&toUser="+toUser+"&word="+word+"&youdao="+selectedItem[1]+"&jinshan="+selectedItem[2]+"&haici="+selectedItem[0];
+                        //System.out.println(param);
                         String jsonResult=contentPanel.sendPost(url,param);
+                        //System.out.println(jsonResult);
                         JSONObject all=new JSONObject(jsonResult);
                         String status=all.getString("status");
                         if(status.equals("success"))//发送成功
@@ -246,7 +249,7 @@ public class UserPanel extends JPanel{
     {
         public void valueChanged(ListSelectionEvent e)
         {
-            if(toShare) {//用户点击了分享
+            if(toShare&&offlineUserList.getSelectedValue()!=null) {//用户点击了分享
                 if (offlineUserList.getValueIsAdjusting())
                 {
                     String senderUserName=userName[0];
@@ -258,9 +261,20 @@ public class UserPanel extends JPanel{
                     boolean[] selectedItem=contentPanel.getSelectedItem();//分享的网站
                     if(curWordOrPhrase!=null)//要发送的单词非空
                     {
-                        JOptionPane.showMessageDialog(null, "向用户\""+targetUserName+"\"分享单词\""+curWordOrPhrase+"\"!!", "提示",JOptionPane.PLAIN_MESSAGE);
                         //向服务器发送单词卡
                         //senderUserName,targetUserName,word,{true,true,true}
+                        String fromUser=senderUserName;
+                        String toUser=targetUserName;
+                        String word=curWordOrPhrase;
+                        String url="http://115.159.0.12:8080/card/send";
+                        String param="fromUser="+fromUser+"&toUser="+toUser+"&word="+word+"&youdao="+selectedItem[1]+"&jinshan="+selectedItem[2]+"&haici="+selectedItem[0];
+                        //System.out.println(param);
+                        String jsonResult=contentPanel.sendPost(url,param);
+                        //System.out.println(jsonResult);
+                        JSONObject all=new JSONObject(jsonResult);
+                        String status=all.getString("status");
+                        if(status.equals("success"))//发送成功
+                            JOptionPane.showMessageDialog(null, "成功向用户\""+targetUserName+"\"分享单词\""+curWordOrPhrase+"\"!!", "提示",JOptionPane.PLAIN_MESSAGE);
                     }
                     else
                     {
@@ -273,6 +287,7 @@ public class UserPanel extends JPanel{
         }
     }
 
+    //发送注销请求
     public void sendLogout()
     {
             String url="http://115.159.0.12:8080/user/logout";
@@ -291,6 +306,39 @@ public class UserPanel extends JPanel{
             else
                 JOptionPane.showMessageDialog(null, "注销失败！", "错误",JOptionPane.ERROR_MESSAGE);
     }
+    //获得用户列表
+    public void renewUserList()
+    {
+        //清空当前列表
+        //onlineUserList.setListData(new String[]{});
+        //offlineUserList.setListData(new String[]{});
+        //向服务器发送请求获得在线和离线用户列表
+        String urlName="http://115.159.0.12:8080/user/list";
+        String jsonResult=contentPanel.get(urlName);
+        JSONObject all=new JSONObject(jsonResult);
+        //在线用户
+        JSONArray onlineUsers=all.getJSONArray("onlineUsers");
+        String[] onlineUsersStringArray=new String[onlineUsers.length()-1];
+        int index=0;
+        for(int i=0;i<onlineUsers.length();i++)
+        {
+            if(!onlineUsers.getString(i).equals(userName[0])) {
+                onlineUsersStringArray[index] = onlineUsers.getString(i);
+                index++;
+            }
+        }
+        onlineUserList.setListData(onlineUsersStringArray);
+        //离线用户
+        JSONArray offlineUsers=all.getJSONArray("offlineUsers");
+        String[] offlineUsersStringArray=new String[offlineUsers.length()];
+        for(int i=0;i<offlineUsers.length();i++)
+        {
+            offlineUsersStringArray[i]=offlineUsers.getString(i);
+        }
+        offlineUserList.setListData(offlineUsersStringArray);
+        //onlineUserList.setListData(new String[]{"as","b","c","d","as","b","c","d","as","b","c","d","as","b","c","d"});
+        //offlineUserList.setListData(new String[]{"as","b","c","d","as","b","c","d","as","b","c","d","as","b","c","d"});
+    }
 
 
     /*监听用户登录状态是否发生改变的任务*/
@@ -301,6 +349,12 @@ public class UserPanel extends JPanel{
             while(true)
             {
                 //System.out.println("..");
+                try {
+                    Thread.sleep(2000);//每隔2秒请求一次
+                }catch(InterruptedException e)
+                {
+                    System.out.println("Interrupted!");
+                }
                 synchronized (statusChange) {
                     if (statusChange[0] == 1) {
                         //System.out.println("AAA");
@@ -312,12 +366,14 @@ public class UserPanel extends JPanel{
                             statusLabel.setToolTipText("在线状态");
                             userListPanel.setVisible(true);
                             contentPanel.headPanel.titlePanel.message.setVisible(true);
+                            contentPanel.headPanel.titlePanel.user.setToolTipText("当前在线："+userName[0]);
                         } else//用户刚刚注销
                         {
                             statusLabel.setIcon(offlineIcon);
                             statusLabel.setToolTipText("离线状态");
                             userListPanel.setVisible(false);
                             contentPanel.headPanel.titlePanel.message.setVisible(false);
+                            contentPanel.headPanel.titlePanel.user.setToolTipText("用户窗口");
                         }
                     }
                 }
@@ -331,7 +387,7 @@ public class UserPanel extends JPanel{
         {
             while(true) {
                 try {
-                    Thread.sleep(5000);//每隔5秒请求一次
+                    Thread.sleep(5000);//每隔10秒请求一次
                 }catch(InterruptedException e)
                 {
                     System.out.println("Interrupted!");
@@ -339,24 +395,32 @@ public class UserPanel extends JPanel{
                 if (status)//用户已经登录
                 {
                     //向服务器发送消息请求
-                    boolean receiveMessage=true;
-                    if(receiveMessage)//没有消息
-                    {
-
-                    }
-                    else//有消息
+                    String urlName="http://115.159.0.12:8080/card/receive?username="+userName[0];
+                    String jsonResult=contentPanel.get(urlName);
+                    JSONObject all=new JSONObject(jsonResult);
+                    JSONArray cards=all.getJSONArray("cards");
+                    boolean receiveMessage=(cards.length()>0);
+                    if(receiveMessage)//有消息
                     {
                         //解析json获得senderUserName,wordOrPhrase,selectedItem
-                        String senderUserName = "WHJ";
-                        String wordOrPhrase = "hello";
-                        //String[] words = {"boy", "girl", "man"};
-                        boolean[] selectedItem = {true, false, true};
-                        //更新contentPanel
-                        contentPanel.addWordOrPhrase(wordOrPhrase);
-                        contentPanel.addSelectedItem(selectedItem);
-                        //提示收到消息
-                        JOptionPane.showMessageDialog(null, "收到用户\"" + senderUserName + "\"分享的单词\"" + wordOrPhrase + "\"!!\n请在消息中查看!!", "提示", JOptionPane.PLAIN_MESSAGE);
+                        for (int i = 0; i < cards.length(); i++) {
+                            JSONObject aCard=cards.getJSONObject(i);
+                            String senderUserName =aCard.getString("from");
+                            String wordOrPhrase = aCard.getString("word");
+                            boolean[] selectedItem = {aCard.getBoolean("haici"), aCard.getBoolean("youdao"), aCard.getBoolean("jinshan")};
+                            //更新contentPanel
+                            contentPanel.addWordOrPhrase(wordOrPhrase);
+                            contentPanel.addSelectedItem(selectedItem);
+                            //提示收到消息
+                            JOptionPane.showMessageDialog(null, "收到用户\"" + senderUserName + "\"分享的单词\"" + wordOrPhrase + "\"!!\n请在消息中查看!!", "提示", JOptionPane.PLAIN_MESSAGE);
+                        }
                     }
+                }
+                try {
+                    Thread.sleep(5000);//每隔10秒请求一次
+                }catch(InterruptedException e)
+                {
+                    System.out.println("Interrupted!");
                 }
             }
         }

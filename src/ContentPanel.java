@@ -294,52 +294,35 @@ public class ContentPanel extends JPanel{
     //get the explanations and likes of input from the server
     private void getExplanationsAndLikes(String wordOrPhrase)
     {
-        URL url=null;
-        Scanner input=null;
-        String jsonResult="";
-        try{
-            url=new URL("http://115.159.0.12:8080/q?word="+wordOrPhrase.replace(' ','+')+"&haici=true&youdao=true&jinshan=true");
-            input=new Scanner(url.openStream());
-            while(input.hasNextLine()) {
-                jsonResult+=input.nextLine();
-            }
-            System.out.println(jsonResult);
-        }
-        catch(MalformedURLException ex)
-        {
-            System.out.println("无法打开URL");
-        }
-        catch(IOException ex)
-        {
-            System.out.println("无法打开URL");
-        }
-        finally{
-            input.close();
-        }
-
+        String urlName="http://115.159.0.12:8080/q?word="+wordOrPhrase.replace(' ','+')+"&haici=true&youdao=true&jinshan=true";
+        String jsonResult=get(urlName);
         JSONObject all=new JSONObject(jsonResult);
         String jsonWord=all.getString("word");
         if(jsonWord.equals(wordOrPhrase)) {
             JSONArray jsonExplanations=all.getJSONArray("explanations");
+            boolean allFail=true;
             for (int i = 0; i < 3; i++) {
                 JSONObject jsonObject=jsonExplanations.getJSONObject(i);
+                String source=jsonObject.getString("source");
+                int index;
+                if(source.equals("haici"))
+                    index=0;
+                else if(source.equals("youdao"))
+                    index=1;
+                else
+                    index=2;
                 String status=jsonObject.getString("status");
                 if(status.equals("success"))
                 {
-                    String source=jsonObject.getString("source");
-                    int index;
-                    if(source.equals("haici"))
-                        index=0;
-                    else if(source.equals("youdao"))
-                        index=1;
-                    else
-                        index=2;
+                    allFail=false;
                     String enPhonetic=jsonObject.getString("enPhonetic");
                     String usPhonetic=jsonObject.getString("usPhonetic");
                     String translation=jsonObject.getString("translation");
                     explanations[index]="英 ["+enPhonetic+"]\n美 ["+usPhonetic+"]\n译: "+translation;
-                    likes[index]=jsonObject.getInt("likes");
                 }
+                else
+                    explanations[index]="未找到该词汇或短语的释义";
+                likes[index]=jsonObject.getInt("likes");
             }
         }
     }
@@ -367,28 +350,6 @@ public class ContentPanel extends JPanel{
 
     //向服务器发送点赞或者取消赞的请求
     boolean sendLikeORDislike(int index) {
-       /*
-        URL url = null;
-        Scanner input = null;
-        String jsonResult = "";
-        try {
-            String urlName = "http://115.159.0.12:8080/like?word=" + curWordOrPhrase.replace(' ', '+') + "&source=" + websiteTitle[index];
-            if (isLike[index])//取消赞
-                urlName += "&dislike=true";
-            url = new URL(urlName);
-            input = new Scanner(url.openStream());
-            while (input.hasNextLine()) {
-                jsonResult += input.nextLine();
-            }
-            System.out.println(jsonResult);
-        } catch (MalformedURLException ex) {
-            System.out.println("无法打开URL");
-        } catch (IOException ex) {
-            System.out.println("无法打开URL");
-        } finally {
-            input.close();
-        }
-        */
         String url = "http://115.159.0.12:8080/word/like";
         String param="word=" + curWordOrPhrase.replace(' ', '+') + "&source=" + source[index];
         if (isLike[index])//取消赞
@@ -451,5 +412,32 @@ public class ContentPanel extends JPanel{
             out.close();
         }
         return result;
+    }
+
+    public static String get(String urlName)
+    {
+        URL url=null;
+        Scanner input=null;
+        String jsonResult="";
+        try{
+            url=new URL(urlName);
+            input=new Scanner(url.openStream());
+            while(input.hasNextLine()) {
+                jsonResult+=input.nextLine();
+            }
+            System.out.println(jsonResult);
+        }
+        catch(MalformedURLException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        catch(IOException ex)
+        {
+            System.out.println("无法打开URL");
+        }
+        finally{
+            input.close();
+        }
+        return jsonResult;
     }
 }
